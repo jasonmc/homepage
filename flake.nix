@@ -26,6 +26,34 @@
         packages.default = self.packages.${system}.${packageName};
         defaultPackage = self.packages.${system}.default;
 
+        packages.website = pkgs.stdenv.mkDerivation {
+          name = "website";
+          buildInputs = [];
+          src = pkgs.nix-gitignore.gitignoreSourcePure [
+            ./.gitignore
+            ".git"
+            ".github"
+          ] ./.;
+
+          # LANG and LOCALE_ARCHIVE are fixes pulled from the community:
+          #   https://github.com/jaspervdj/hakyll/issues/614#issuecomment-411520691
+          #   https://github.com/NixOS/nix/issues/318#issuecomment-52986702
+          #   https://github.com/MaxDaten/brutal-recipes/blob/source/default.nix#L24
+          LANG = "en_US.UTF-8";
+          LOCALE_ARCHIVE = pkgs.lib.optionalString
+            (pkgs.buildPlatform.libc == "glibc")
+            "${pkgs.glibcLocales}/lib/locale/locale-archive";
+
+          buildPhase = ''
+            ${self.packages.${system}.${packageName}}/bin/site build --verbose
+          '';
+
+          installPhase = ''
+            mkdir -p "$out/dist"
+            cp -a _site/. "$out/dist"
+          '';
+        };
+
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             haskellPackages.haskell-language-server # you must build it with your ghc to work
