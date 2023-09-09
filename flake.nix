@@ -33,7 +33,7 @@
             ./.gitignore
             ".git"
             ".github"
-          ] ./.;
+          ] ./data;
 
           # LANG and LOCALE_ARCHIVE are fixes pulled from the community:
           #   https://github.com/jaspervdj/hakyll/issues/614#issuecomment-411520691
