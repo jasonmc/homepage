@@ -13,21 +13,9 @@
 
         haskellPackages = pkgs.haskellPackages;
 
-        # jailbreakUnbreak = pkg:
-        #   pkgs.haskell.lib.doJailbreak (pkg.overrideAttrs (_: { meta = { }; }));
+        builder = haskellPackages.callCabal2nix "Builder" "${./builder}" { };
 
-        packageName = "jason-homepage";
-      in
-      {
-        packages.${packageName} =
-          haskellPackages.callCabal2nix packageName self rec {
-            # Dependency overrides go here
-          };
-
-        packages.default = self.packages.${system}.${packageName};
-        defaultPackage = self.packages.${system}.default;
-
-        packages.website = pkgs.stdenv.mkDerivation {
+        site = pkgs.stdenv.mkDerivation {
           name = "website";
           buildInputs = [ ];
           src = pkgs.nix-gitignore.gitignoreSourcePure [
@@ -46,7 +34,7 @@
             "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
           buildPhase = ''
-            ${self.packages.${system}.${packageName}}/bin/site build --verbose
+            ${builder}/bin/site build --verbose
           '';
 
           installPhase = ''
@@ -54,15 +42,20 @@
             cp -a _site/. "$out/dist"
           '';
         };
+      in
+      {
+        packages.builder = builder;
+        packages.website = site;
 
-        devShells.default = haskellPackages.shellFor {
-          packages = p: [ self.packages.${system}.${packageName} ];
-          buildInputs = with haskellPackages; self.packages.${system}.${packageName}.buildInputs ++ [
+        packages.default = self.packages.${system}.website;
+
+
+        devShell = haskellPackages.shellFor {
+          packages = p: [ builder ];
+          buildInputs = with haskellPackages; site.buildInputs ++ [
             haskell-language-server
             cabal-install
           ];
         };
-
-        devShell = self.devShells.${system}.default;
       });
 }
