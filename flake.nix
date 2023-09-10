@@ -17,7 +17,8 @@
         #   pkgs.haskell.lib.doJailbreak (pkg.overrideAttrs (_: { meta = { }; }));
 
         packageName = "jason-homepage";
-      in {
+      in
+      {
         packages.${packageName} =
           haskellPackages.callCabal2nix packageName self rec {
             # Dependency overrides go here
@@ -28,7 +29,7 @@
 
         packages.website = pkgs.stdenv.mkDerivation {
           name = "website";
-          buildInputs = [];
+          buildInputs = [ ];
           src = pkgs.nix-gitignore.gitignoreSourcePure [
             ./.gitignore
             ".git"
@@ -55,12 +56,12 @@
         };
 
         devShells.default = haskellPackages.shellFor {
-              packages = p: [ self.packages.${system}.${packageName} ];
-              buildInputs = with haskellPackages; self.packages.${system}.${packageName}.buildInputs ++ [
-                haskell-language-server
-                cabal-install
-              ];
-            };
+          packages = p: [ self.packages.${system}.${packageName} ];
+          buildInputs = with haskellPackages; self.packages.${system}.${packageName}.buildInputs ++ [
+            haskell-language-server
+            cabal-install
+          ];
+        };
 
         devShell = self.devShells.${system}.default;
       });
