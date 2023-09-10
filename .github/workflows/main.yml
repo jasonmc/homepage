@@ -1,0 +1,57 @@
+name: Website push
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v23
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            allow-import-from-derivation = true
+            auto-optimise-store = true
+            experimental-features = nix-command flakes
+
+      - name: Build with cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: hakyll-nix-template
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - run: nix build --accept-flake-config .#website
+
+      - name: Artifact pages
+        uses: actions/upload-artifact@v3
+        with:
+          name: pages
+          path: result/dist
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: [build-nix]
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pages
+          path: result
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3.2.0
+        with:
+          build_dir: result
+          target_branch: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
