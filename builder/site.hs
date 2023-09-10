@@ -3,10 +3,15 @@
 import           Data.Monoid (mappend)
 import           Hakyll
 
+hakyllConfig :: Configuration
+hakyllConfig = defaultConfiguration
+  { 
+  providerDirectory    = "data/"
+  }
 
 --------------------------------------------------------------------------------
 main :: IO ()
-main = hakyll $ do
+main = hakyllWith hakyllConfig $ do
     match "images/*" $ do
         route   idRoute
         compile copyFileCompiler

@@ -22,7 +22,7 @@
             ./.gitignore
             ".git"
             ".github"
-          ] ./data;
+          ] ./.;
 
           # LANG and LOCALE_ARCHIVE are fixes pulled from the community:
           #   https://github.com/jaspervdj/hakyll/issues/614#issuecomment-411520691
@@ -42,6 +42,14 @@
             cp -a _site/. "$out/dist"
           '';
         };
+
+        watch = pkgs.runCommand "watch"
+          {
+            buildInputs = [ pkgs.makeWrapper ];
+          }
+          ''
+            makeWrapper "${pkgs.writeScript "watch-unwrapped" "site watch"}" "$out" ${builtins.toString  (map (p: "--prefix PATH : ${p}/bin") [ builder ])}
+          '';
       in
       {
         packages.builder = builder;
@@ -49,6 +57,7 @@
 
         packages.default = self.packages.${system}.website;
 
+        apps.watch = { type = "app"; program = "${watch}"; };
 
         devShell = haskellPackages.shellFor {
           packages = p: [ builder ];
