@@ -54,14 +54,14 @@
           '';
         };
 
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            haskellPackages.haskell-language-server # you must build it with your ghc to work
-            ghcid
-            cabal-install
-          ];
-          inputsFrom = map (__getAttr "env") (__attrValues self.packages.${system});
-        };
+        devShells.default = haskellPackages.shellFor {
+              packages = p: [ self.packages.${system}.${packageName} ];
+              buildInputs = with haskellPackages; self.packages.${system}.${packageName}.buildInputs ++ [
+                haskell-language-server
+                cabal-install
+              ];
+            };
+
         devShell = self.devShells.${system}.default;
       });
 }
