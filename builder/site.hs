@@ -2,6 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend)
 import           Hakyll
+import           Diagrams.Prelude hiding (tri, Context)
+import Diagrams.Backend.SVG
+
 
 domain :: String
 domain = "jasonmc.net"
@@ -11,6 +14,28 @@ hakyllConfig = defaultConfiguration
   { 
   providerDirectory    = "data/"
   }
+
+
+hilbert 0 = mempty
+hilbert n = hilbert' (n-1) # reflectY <> vrule 1
+         <> hilbert  (n-1) <> hrule 1
+         <> hilbert  (n-1) <> vrule (-1)
+         <> hilbert' (n-1) # reflectX
+  where
+    hilbert' m = hilbert m # rotateBy (1/4)
+
+
+diagram :: Diagram B
+diagram =
+  strokeT (hilbert 5)
+    # lc darkred
+    # lw medium
+    # frame 1
+
+diagramCompiler :: Compiler (Item String)
+diagramCompiler = do
+  let rendered = renderDia SVG (SVGOptions (mkWidth 250) Nothing "" [] True) diagram
+  makeItem $ show rendered
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -26,6 +51,10 @@ main = hakyllWith hakyllConfig $ do
     match "css/*" $ do
         route   idRoute
         compile compressCssCompiler
+
+    create ["diagram.svg"] $ do
+        route idRoute
+        compile diagramCompiler
 
     match (fromList ["about.rst", "contact.markdown"]) $ do
         route   $ setExtension "html"
