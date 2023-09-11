@@ -3,6 +3,9 @@
 import           Data.Monoid (mappend)
 import           Hakyll
 
+domain :: String
+domain = "jasonmc.net"
+
 hakyllConfig :: Configuration
 hakyllConfig = defaultConfiguration
   { 
@@ -62,6 +65,10 @@ main = hakyllWith hakyllConfig $ do
                 >>= relativizeUrls
 
     match "templates/*" $ compile templateBodyCompiler
+
+    create ["CNAME"] $ do
+        route idRoute
+        compile $ makeItem domain
 
 
 --------------------------------------------------------------------------------
