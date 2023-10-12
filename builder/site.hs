@@ -52,6 +52,10 @@ main = hakyllWith hakyllConfig $ do
         route   idRoute
         compile compressCssCompiler
 
+    match "fonts/*" $ do
+        route   idRoute
+        compile copyFileCompiler
+
     create ["diagram.svg"] $ do
         route idRoute
         compile diagramCompiler
