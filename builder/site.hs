@@ -28,7 +28,7 @@ hilbert n = hilbert' (n-1) # reflectY <> vrule 1
 diagram :: Diagram B
 diagram =
   strokeT (hilbert 5)
-    # lc darkred
+    # lc (sRGB24read "#a50104")
     # lw medium
     # frame 1
 

@@ -1,50 +1,155 @@
-@font-face {
-  font-family: 'Merriweather';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/merriweather.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+:root {
+    --selective-yellow: #fcba04ff;
+    --turkey-red: #a50104ff;
+    --rosewood: #590004ff;
+    --black-bean: #250001ff;
+    --white-smoke: #f3f3f3ff;
 }
-
-@font-face {
-  font-family: 'Roboto Slab';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/robotoslab.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
 
 body {
-  font-family: 'Merriweather', serif;
-  line-height: 1.7;
-  margin: 3rem 6%;
-  color: #313131;
-  background-color: #fdfdfd;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto Slab', sans-serif;
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
-  font-weight: 700;
-  color: #2a2a2a;
-}
-
-p {
-  margin-bottom: 1.4rem;
-  font-size: 1.05em;
+    font-family: 'Merriweather', georgia, serif;
+    line-height: 1.6;
+    max-width: 40em;
+    margin: 2em auto 1em auto;
+    padding: 0 2em;
 }
 
 a {
-  color: #3b5998;
-  text-decoration: none;
-  transition: color 0.3s;
+    color: var(--turkey-red);
+    text-decoration: none;
+}
+
+a:visited {
+    color: var(--turkey-red);
 }
 
 a:hover {
-  color: #2a407a;
-  text-decoration: underline;
+    color: var(--rosewood);
+}
+
+a.cta {
+    background-color: var(--rosewood);
+    color: var(--white-smoke);
+    padding: 10px 15px;
+    border-radius: 10px;
+    transition: background-color 0.3s;
+}
+
+a.cta:hover {
+    background-color: var(--turkey-red);
+}
+
+blockquote {
+    font-style: italic;
+    margin: 1.5em 1em;
+    padding: 0 1em;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    padding-left: 1vw;
+    padding-right: 1vw;
+    color: #555;
+    border-top: 1px #999 solid;
+    border-bottom: 1px #999 solid;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+caption {
+    font-style: italic;
+    margin: 1.5em 0;
+    text-align: center;
+}
+
+em {
+    font-style: italic;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Roboto Slab', sans-serif;
+}
+
+h1 {
+    color: var(--rosewood);
+}
+
+h1 a {
+    color: var(--rosewood);
+    text-decoration: none;
+}
+
+h1 a:visited {
+    color: #685c82;
+}
+
+h2 {
+    font-size: 150%;
+    line-height: 1;
+    margin: 1em 0;
+    color: var(--selective-yellow);
+}
+
+h3 {
+    font-size: 110%;
+    line-height: 1.3636363636;
+    margin: 1.3636363636em 0;
+}
+
+h3,
+th {
+    color: var(--selective-yellow);
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+    font-variant: small-caps;
+}
+
+h4 {
+    font-size: 90%;
+    font-weight: bold;
+    line-height: 1.666666667;
+    margin: 1.666666667em 0;
+}
+
+h5 {
+    font-style: italic;
+    margin: 1.5em 0;
+}
+
+html {
+    background-color: var(--white-smoke);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23a50104' fill-opacity='0.10' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+    color: var(--black-bean);
+    font-size: 20px;
+}
+
+p {
+    margin: 1.5em 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td,
+th {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+footer {
+    clear: both;
+    padding-top: 3em;
+    text-align: center;
+    font-size: 85%;
+    font-style: italic;
+    color: #6c5a5a;
 }
