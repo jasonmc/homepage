@@ -15,19 +15,13 @@ hakyllConfig = defaultConfiguration
   providerDirectory    = "data/"
   }
 
-
-hilbert 0 = mempty
-hilbert n = hilbert' (n-1) # reflectY <> vrule 1
-         <> hilbert  (n-1) <> hrule 1
-         <> hilbert  (n-1) <> vrule (-1)
-         <> hilbert' (n-1) # reflectX
-  where
-    hilbert' m = hilbert m # rotateBy (1/4)
-
+dragon :: Int -> Trail V2 Double
+dragon 0 = fromOffsets [unitX]
+dragon n = dragon (n - 1) <> rotateBy (1/4) (reverseTrail $ dragon (n - 1))
 
 diagram :: Diagram B
 diagram =
-  strokeT (hilbert 5)
+    strokeT (dragon 10)
     # lc (sRGB24read "#a50104")
     # lw medium
     # frame 1
