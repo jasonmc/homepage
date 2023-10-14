@@ -114,6 +114,14 @@ main = hakyllWith hakyllConfig $ do
                 >>= loadAndApplyTemplate "templates/default.html" indexCtx
                 >>= relativizeUrls
 
+    match "404.html" $ do
+        route idRoute
+        compile $ do
+            getResourceBody
+                >>= applyAsTemplate defaultContext
+                >>= loadAndApplyTemplate "templates/default.html" defaultContext
+                >>= relativizeUrls
+
     match "templates/*" $ compile templateBodyCompiler
 
     create ["CNAME"] $ do
