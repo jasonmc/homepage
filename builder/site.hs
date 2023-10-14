@@ -15,6 +15,16 @@ hakyllConfig = defaultConfiguration
   providerDirectory    = "data/"
   }
 
+
+feedConfiguration :: FeedConfiguration
+feedConfiguration = FeedConfiguration
+    { feedTitle       = "jasonmc.net latest posts"
+    , feedDescription = "Feed of Jason McCandless homepage posts."
+    , feedAuthorName  = "Jason McCandless"
+    , feedAuthorEmail = "me@jasonmc.net"
+    , feedRoot        = "https://jasonmc.net"
+    }
+
 dragon :: Int -> Trail V2 Double
 dragon 0 = fromOffsets [unitX]
 dragon n = dragon (n - 1) <> rotateBy (1/4) (reverseTrail $ dragon (n - 1))
@@ -64,8 +74,17 @@ main = hakyllWith hakyllConfig $ do
         route $ setExtension "html"
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/post.html"    postCtx
+            >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
+
+    create ["rss.xml"] $ do
+        route idRoute
+        compile $ do
+            let feedCtx = postCtx `mappend` bodyField "description"
+            posts <- fmap (take 10) . recentFirst =<<
+                loadAllSnapshots "posts/*" "content"
+            renderRss feedConfiguration feedCtx posts
 
     create ["archive.html"] $ do
         route idRoute
