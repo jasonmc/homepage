@@ -21,11 +21,8 @@ jobs:
             auto-optimise-store = true
             experimental-features = nix-command flakes
 
-      - name: Build with cachix
-        uses: cachix/cachix-action@v15
-        with:
-          name: hakyll-nix-template
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: Setup Nix Magic Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
       - run: nix build --accept-flake-config .#website
 
