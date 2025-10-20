@@ -13,6 +13,13 @@
 
         haskellPackages = pkgs.haskellPackages;
 
+        sourceInfo = self.sourceInfo or { };
+        gitRev =
+          if sourceInfo ? dirtyShortRev then sourceInfo.dirtyShortRev
+          else if sourceInfo ? shortRev then sourceInfo.shortRev
+          else if sourceInfo ? rev then builtins.substring 0 7 sourceInfo.rev
+          else "unknown";
+
         builder = haskellPackages.callCabal2nix "Builder" "${./builder}" { };
 
         site = pkgs.stdenv.mkDerivation {
@@ -32,6 +39,8 @@
           LOCALE_ARCHIVE = pkgs.lib.optionalString
             (pkgs.buildPlatform.libc == "glibc")
             "${pkgs.glibcLocales}/lib/locale/locale-archive";
+
+          GIT_COMMIT = gitRev;
 
           buildPhase = ''
             ${builder}/bin/site build --verbose

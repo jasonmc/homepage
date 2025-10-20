@@ -1,9 +1,11 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend)
+import           Data.Maybe (fromMaybe)
 import           Hakyll
 import           Diagrams.Prelude hiding (tri, Context)
-import Diagrams.Backend.SVG
+import           Diagrams.Backend.SVG
+import           System.Environment (lookupEnv)
 
 
 domain :: String
@@ -41,6 +43,14 @@ diagramCompiler = do
   let rendered = renderDia SVG (SVGOptions (mkWidth 250) Nothing "" [] True) diagram
   makeItem $ show rendered
 
+gitContext :: Context String
+gitContext =
+  field "gitRevision" $ \_ -> unsafeCompiler $
+    fmap (fromMaybe "unknown") (lookupEnv "GIT_COMMIT")
+
+baseCtx :: Context String
+baseCtx = gitContext `mappend` defaultContext
+
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
@@ -67,7 +77,7 @@ main = hakyllWith hakyllConfig $ do
     match (fromList ["about.rst", "contact.markdown"]) $ do
         route   $ setExtension "html"
         compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= loadAndApplyTemplate "templates/default.html" baseCtx
             >>= relativizeUrls
 
     match "posts/*" $ do
@@ -93,7 +103,7 @@ main = hakyllWith hakyllConfig $ do
             let archiveCtx =
                     listField "posts" postCtx (return posts) `mappend`
                     constField "title" "Archives"            `mappend`
-                    defaultContext
+                    baseCtx
 
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
@@ -107,7 +117,7 @@ main = hakyllWith hakyllConfig $ do
             posts <- recentFirst =<< loadAll "posts/*"
             let indexCtx =
                     listField "posts" postCtx (return posts) `mappend`
-                    defaultContext
+                    baseCtx
 
             getResourceBody
                 >>= applyAsTemplate indexCtx
@@ -118,8 +128,8 @@ main = hakyllWith hakyllConfig $ do
         route idRoute
         compile $ do
             getResourceBody
-                >>= applyAsTemplate defaultContext
-                >>= loadAndApplyTemplate "templates/default.html" defaultContext
+                >>= applyAsTemplate baseCtx
+                >>= loadAndApplyTemplate "templates/default.html" baseCtx
                 >>= relativizeUrls
 
     match "templates/*" $ compile templateBodyCompiler
@@ -133,4 +143,4 @@ main = hakyllWith hakyllConfig $ do
 postCtx :: Context String
 postCtx =
     dateField "date" "%B %e, %Y" `mappend`
-    defaultContext
+    baseCtx
