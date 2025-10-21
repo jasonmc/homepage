@@ -24,13 +24,20 @@ jobs:
       - name: Setup Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - run: nix build --accept-flake-config .#website
+      - name: Build Pages tarball
+        id: build
+        run: |
+          out_path=$(nix build --accept-flake-config --no-link --print-out-paths .#website-pages)
+          cp "$out_path" "$PWD/artifact.tar"
+          chmod 644 "$PWD/artifact.tar"
+          echo "artifact=$PWD/artifact.tar" >> "$GITHUB_OUTPUT"
 
-      - name: Artifact pages
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload tar artifact
+        uses: actions/upload-artifact@v4
         with:
           name: github-pages
-          path: result/dist
+          path: ${{ steps.build.outputs.artifact }}
+          if-no-files-found: error
 
   deploy:
       if: github.ref == 'refs/heads/master'

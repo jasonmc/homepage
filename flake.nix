@@ -47,10 +47,22 @@
           '';
 
           installPhase = ''
-            mkdir -p "$out/dist"
-            cp -a _site/. "$out/dist"
+            cp -a _site/. "$out"
           '';
         };
+
+        pagesArtifact = pkgs.runCommand "website-pages.tar"
+          { buildInputs = [ pkgs.gnutar ]; }
+          ''
+            tar \
+              --dereference \
+              --hard-dereference \
+              --owner=root \
+              --group=root \
+              --directory ${site} \
+              -cf "$out" \
+              .
+          '';
 
         watch = pkgs.runCommand "watch"
           {
@@ -63,6 +75,7 @@
       {
         packages.builder = builder;
         packages.website = site;
+        packages.website-pages = pagesArtifact;
 
         packages.default = self.packages.${system}.website;
 
