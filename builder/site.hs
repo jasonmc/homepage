@@ -4,9 +4,16 @@
 import Data.Maybe (fromMaybe)
 import Data.Monoid (mappend)
 import Diagrams.Backend.SVG
-import Diagrams.Prelude hiding (Context, tri)
+import Diagrams.Prelude hiding (Context, Style, tri)
 import Hakyll
+import Hakyll.Web.Pandoc
+  ( defaultHakyllReaderOptions,
+    defaultHakyllWriterOptions,
+    pandocCompilerWith
+  )
 import System.Environment (lookupEnv)
+import Text.Pandoc.Highlighting (Style, styleToCss, tango)
+import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
 
 domain :: String
 domain = "jasonmc.net"
@@ -52,6 +59,18 @@ gitContext =
 baseCtx :: Context String
 baseCtx = gitContext `mappend` defaultContext
 
+highlightStyle :: Style
+highlightStyle = tango
+
+writerOptions :: WriterOptions
+writerOptions =
+  defaultHakyllWriterOptions
+    { writerHighlightStyle = Just highlightStyle
+    }
+
+readerOptions :: ReaderOptions
+readerOptions = defaultHakyllReaderOptions
+
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
@@ -67,6 +86,10 @@ main = hakyllWith hakyllConfig $ do
     route idRoute
     compile compressCssCompiler
 
+  create ["css/syntax.css"] $ do
+    route idRoute
+    compile $ makeItem (styleToCss highlightStyle)
+
   match "fonts/*" $ do
     route idRoute
     compile copyFileCompiler
@@ -78,14 +101,14 @@ main = hakyllWith hakyllConfig $ do
   match (fromList ["about.rst", "contact.markdown"]) $ do
     route $ setExtension "html"
     compile $
-      pandocCompiler
+      pandocCompilerWith readerOptions writerOptions
         >>= loadAndApplyTemplate "templates/default.html" baseCtx
         >>= relativizeUrls
 
   match "posts/*" $ do
     route $ setExtension "html"
     compile $
-      pandocCompiler
+      pandocCompilerWith readerOptions writerOptions
         >>= loadAndApplyTemplate "templates/post.html" postCtx
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/default.html" postCtx

@@ -193,6 +193,22 @@ pre {
     border-radius: 6px;
 }
 
+div.sourceCode {
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent-soft);
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1.6rem 0;
+    padding: 1.2rem 1.4rem;
+}
+
+div.sourceCode pre {
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
 pre code {
     background: transparent;
     padding: 0;
