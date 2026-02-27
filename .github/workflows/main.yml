@@ -33,7 +33,7 @@ jobs:
           echo "artifact=$PWD/artifact.tar" >> "$GITHUB_OUTPUT"
 
       - name: Upload tar artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: github-pages
           path: ${{ steps.build.outputs.artifact }}
