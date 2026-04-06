@@ -37,7 +37,7 @@
           #   https://github.com/MaxDaten/brutal-recipes/blob/source/default.nix#L24
           LANG = "en_US.UTF-8";
           LOCALE_ARCHIVE = pkgs.lib.optionalString
-            (pkgs.buildPlatform.libc == "glibc")
+            (pkgs.stdenv.buildPlatform.libc == "glibc")
             "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
           GIT_COMMIT = gitRev;
@@ -81,7 +81,7 @@
 
         apps.watch = { type = "app"; program = "${watch}"; };
 
-        devShell = haskellPackages.shellFor {
+        devShells.default = haskellPackages.shellFor {
           packages = p: [ builder ];
           buildInputs = with haskellPackages; site.buildInputs ++ [
             haskell-language-server
