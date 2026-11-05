@@ -3,7 +3,8 @@
 [![Website push](https://github.com/jasonmc/homepage/actions/workflows/main.yml/badge.svg)](https://github.com/jasonmc/homepage/actions/workflows/main.yml)
 
 Build with `nix build`, or preview locally with `nix run .#watch`.
-Run `nix flake check` to build the site and check its internal links.
+Run `nix flake check` to build the site, validate its HTML with vnu, and check
+its internal links.
 
 Merriweather, Roboto Slab, and Fira Code come from the pinned nixpkgs packages.
 Nix prepares WOFF2 files in the Nix store and passes their directory to Hakyll via

@@ -100,6 +100,16 @@
           relocatable = false;
         };
 
+        checks.html = pkgs.runCommand "website-html-check"
+          {
+            nativeBuildInputs = [ pkgs.validator-nu ];
+            inherit site;
+          }
+          ''
+            vnu --skip-non-html "$site"
+            touch "$out"
+          '';
+
         apps.watch = { type = "app"; program = "${watch}/bin/watch"; };
 
         devShells.default = haskellPackages.shellFor {
