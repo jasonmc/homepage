@@ -1,6 +1,8 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 
+import Control.Monad (forM_)
+import qualified Data.ByteString.Lazy as BL
 import Data.Maybe (fromMaybe)
 import Data.Monoid (mappend)
 import Diagrams.Backend.SVG
@@ -11,7 +13,8 @@ import Hakyll.Web.Pandoc
     defaultHakyllWriterOptions,
     pandocCompilerWith
   )
-import System.Environment (lookupEnv)
+import System.Directory (listDirectory)
+import System.Environment (getEnv, lookupEnv)
 import Text.Pandoc.Highlighting (Style, styleToCss, tango)
 import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
 
@@ -74,6 +77,15 @@ readerOptions = defaultHakyllReaderOptions
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
+  fontDirectory <- preprocess (getEnv "SITE_FONTS")
+  fonts <- preprocess (listDirectory fontDirectory)
+  -- The immutable store path invalidates cached fonts when their package changes.
+  version fontDirectory $
+    forM_ fonts $ \font ->
+      create [fromFilePath ("fonts/" ++ font)] $ do
+        route idRoute
+        compile $ unsafeCompiler (BL.readFile (fontDirectory ++ "/" ++ font)) >>= makeItem
+
   match "images/*" $ do
     route idRoute
     compile copyFileCompiler
@@ -89,10 +101,6 @@ main = hakyllWith hakyllConfig $ do
   create ["css/syntax.css"] $ do
     route idRoute
     compile $ makeItem (styleToCss highlightStyle)
-
-  match "fonts/*" $ do
-    route idRoute
-    compile copyFileCompiler
 
   create ["diagram.svg"] $ do
     route idRoute

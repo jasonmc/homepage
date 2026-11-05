@@ -22,6 +22,19 @@
 
         builder = haskellPackages.callCabal2nix "Builder" "${./builder}" { };
 
+        fonts = pkgs.runCommand "website-fonts"
+          { nativeBuildInputs = [ pkgs.woff2 ]; }
+          ''
+            mkdir -p "$out"
+            cp ${pkgs.merriweather.webfont}/share/fonts/woff2/Merriweather-Regular.woff2 "$out/merriweather.woff2"
+
+            cp ${pkgs.roboto-slab}/share/fonts/truetype/RobotoSlab-Regular.ttf robotoslab.ttf
+            cp ${pkgs.fira-code.override { useVariableFont = false; }}/share/fonts/truetype/FiraCode-Regular.ttf firacode.ttf
+            woff2_compress robotoslab.ttf
+            woff2_compress firacode.ttf
+            cp robotoslab.woff2 firacode.woff2 "$out/"
+          '';
+
         site = pkgs.stdenv.mkDerivation {
           name = "website";
           buildInputs = [ ];
@@ -41,6 +54,7 @@
             "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
           GIT_COMMIT = gitRev;
+          SITE_FONTS = fonts;
 
           buildPhase = ''
             ${builder}/bin/site build --verbose
@@ -64,25 +78,28 @@
               .
           '';
 
-        watch = pkgs.runCommand "watch"
-          {
-            buildInputs = [ pkgs.makeWrapper ];
-          }
-          ''
-            makeWrapper "${pkgs.writeScript "watch-unwrapped" "site watch"}" "$out" ${builtins.toString  (map (p: "--prefix PATH : ${p}/bin") [ builder ])}
+        watch = pkgs.writeShellApplication {
+          name = "watch";
+          runtimeInputs = [ builder ];
+          text = ''
+            export SITE_FONTS=${fonts}
+            exec site watch "$@"
           '';
+        };
       in
       {
         packages.builder = builder;
+        packages.fonts = fonts;
         packages.website = site;
         packages.website-pages = pagesArtifact;
 
         packages.default = self.packages.${system}.website;
 
-        apps.watch = { type = "app"; program = "${watch}"; };
+        apps.watch = { type = "app"; program = "${watch}/bin/watch"; };
 
         devShells.default = haskellPackages.shellFor {
           packages = p: [ builder ];
+          SITE_FONTS = fonts;
           buildInputs = with haskellPackages; site.buildInputs ++ [
             haskell-language-server
             cabal-install
