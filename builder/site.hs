@@ -3,8 +3,12 @@
 
 import Control.Monad (forM, forM_)
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Base64 as Base64
+import qualified Data.ByteString.Lazy as BL
 import Data.Maybe (fromMaybe)
 import Data.Monoid (mappend)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 import Diagrams.Backend.SVG
 import Diagrams.Prelude hiding (Context, Style, tri)
 import Hakyll
@@ -12,11 +16,13 @@ import Hakyll.Core.Util.File (getRecursiveContents)
 import Hakyll.Web.Pandoc
   ( defaultHakyllReaderOptions,
     defaultHakyllWriterOptions,
-    pandocCompilerWith
+    pandocCompilerWithTransformM
   )
 import System.Environment (getEnv, lookupEnv)
 import Text.Pandoc.Highlighting (Style, styleToCss, tango)
+import Text.Pandoc.Definition (Block (..), Inline (..))
 import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
+import Text.Pandoc.Walk (walkM)
 
 domain :: String
 domain = "jasonmc.net"
@@ -64,6 +70,31 @@ writerOptions =
 
 readerOptions :: ReaderOptions
 readerOptions = defaultHakyllReaderOptions
+
+contentCompiler :: Compiler (Item String)
+contentCompiler =
+  pandocCompilerWithTransformM readerOptions writerOptions (walkM renderCodeDiagram)
+
+renderCodeDiagram :: Block -> Compiler Block
+renderCodeDiagram block@(CodeBlock (identifier, classes, attributes) source)
+  | not (any (`elem` classes) ["dot", "graphviz", "pikchr"]) = pure block
+  | lookup "exports" attributes == Just "code" = pure code
+  | "dot" `elem` classes || "graphviz" `elem` classes =
+      render "dot" ["-Tsvg", "-Gbgcolor=transparent"] "Graphviz diagram"
+  | "pikchr" `elem` classes = render "pikchr" ["--svg-only", "-"] "Pikchr diagram"
+  where
+    code = CodeBlock (identifier, classes, filter ((/= "alt") . fst) attributes) source
+    render program arguments fallbackAlt = do
+      svg <- unixFilterLBS program arguments (BL.fromStrict (TE.encodeUtf8 source))
+      let uri = "data:image/svg+xml;base64," <> TE.decodeUtf8 (Base64.encode (BL.toStrict svg))
+          alt = T.dropAround (== '"') (fromMaybe fallbackAlt (lookup "alt" attributes))
+          showSource = lookup "exports" attributes == Just "both"
+          imageId = if showSource then "" else identifier
+          image = Para [Image (imageId, ["diagram"], []) [Str alt] (uri, "")]
+      pure $ if showSource
+        then Div ("", [], []) [code, image]
+        else image
+renderCodeDiagram block = pure block
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -121,14 +152,14 @@ siteRules gitRevision assetDirectory assets = do
   match (fromList ["about.rst", "contact.markdown", "colophon.org"]) $ do
     route $ setExtension "html"
     compile $
-      pandocCompilerWith readerOptions writerOptions
+      contentCompiler
         >>= loadAndApplyTemplate "templates/default.html" baseCtx
         >>= relativizeUrls
 
   match "posts/*" $ do
     route $ setExtension "html"
     compile $
-      pandocCompilerWith readerOptions writerOptions
+      contentCompiler
         >>= loadAndApplyTemplate "templates/post.html" postCtx
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/default.html" postCtx

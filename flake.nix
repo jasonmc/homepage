@@ -22,6 +22,8 @@
 
         builder = haskellPackages.callCabal2nix "Builder" "${./builder}" { };
 
+        diagramTools = [ pkgs.graphviz pkgs.pikchr ];
+
         fonts = pkgs.runCommand "website-fonts" { } ''
           mkdir -p "$out"
           cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Roman.ttf.woff2 "$out/source-serif-4.woff2"
@@ -52,6 +54,7 @@
         site = pkgs.stdenv.mkDerivation {
           name = "website";
           buildInputs = [ ];
+          nativeBuildInputs = diagramTools;
           src = pkgs.nix-gitignore.gitignoreSourcePure [
             ./.gitignore
             ".git"
@@ -94,7 +97,7 @@
 
         watch = pkgs.writeShellApplication {
           name = "watch";
-          runtimeInputs = [ builder ];
+          runtimeInputs = [ builder ] ++ diagramTools;
           text = ''
             while [[ ! -f flake.nix || ! -d data/templates ]]; do
               if [[ "$PWD" == / ]]; then
@@ -137,6 +140,7 @@
 
         devShells.default = haskellPackages.shellFor {
           packages = p: [ builder ];
+          nativeBuildInputs = diagramTools;
           GIT_COMMIT = gitRev;
           SITE_ASSETS = assets;
           buildInputs = with haskellPackages; site.buildInputs ++ [
