@@ -96,6 +96,13 @@
           name = "watch";
           runtimeInputs = [ builder ];
           text = ''
+            while [[ ! -f flake.nix || ! -d data/templates ]]; do
+              if [[ "$PWD" == / ]]; then
+                printf 'Run watch from within the homepage checkout.\n' >&2
+                exit 1
+              fi
+              cd ..
+            done
             export SITE_ASSETS=${assets}
             export GIT_COMMIT=${pkgs.lib.escapeShellArg gitRev}
             exec site watch "$@"

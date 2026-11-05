@@ -3,6 +3,7 @@
 [![Website push](https://github.com/jasonmc/homepage/actions/workflows/main.yml/badge.svg)](https://github.com/jasonmc/homepage/actions/workflows/main.yml)
 
 Build with `nix build`, or preview locally with `nix run .#watch`.
+The preview command finds the project root when run from a subdirectory.
 Run `nix flake check` to build the site, validate its HTML with vnu, and check
 its internal links.
 
