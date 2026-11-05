@@ -86,7 +86,10 @@ renderCodeDiagram block@(CodeBlock (identifier, classes, attributes) source)
     code = CodeBlock (identifier, classes, filter ((/= "alt") . fst) attributes) source
     render program arguments fallbackAlt = do
       svg <- unixFilterLBS program arguments (BL.fromStrict (TE.encodeUtf8 source))
-      let uri = "data:image/svg+xml;base64," <> TE.decodeUtf8 (Base64.encode (BL.toStrict svg))
+      stylesheet <- loadBody "css/diagrams.css"
+      let diagramStyle = "<style>" <> T.pack stylesheet <> "</style>"
+          styledSvg = T.replace "</svg>" (diagramStyle <> "</svg>") (TE.decodeUtf8 (BL.toStrict svg))
+          uri = "data:image/svg+xml;base64," <> TE.decodeUtf8 (Base64.encode (TE.encodeUtf8 styledSvg))
           alt = T.dropAround (== '"') (fromMaybe fallbackAlt (lookup "alt" attributes))
           showSource = lookup "exports" attributes == Just "both"
           imageId = if showSource then "" else identifier
@@ -137,9 +140,16 @@ siteRules gitRevision assetDirectory assets = do
     route idRoute
     compile copyFileCompiler
 
-  match "css/*" $ do
+  match ("css/*" .&&. complement "css/diagrams.css") $ do
     route idRoute
     compile compressCssCompiler
+
+  -- Compile the self-contained SVG stylesheet once, with tracked dependencies.
+  match "css/diagrams.css" $ compile $ do
+    font <- loadBody $ setVersion (Just assetDirectory) "fonts/source-serif-4.woff2"
+    let fontUri = "data:font/woff2;base64," <> TE.decodeUtf8 (Base64.encode font)
+    stylesheet <- compressCssCompiler
+    pure $ fmap (T.unpack . T.replace "/fonts/source-serif-4.woff2" fontUri . T.pack) stylesheet
 
   create ["css/syntax.css"] $ do
     route idRoute

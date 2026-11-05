@@ -21,6 +21,11 @@ Graphviz (`dot`, or `graphviz`) and Pikchr source blocks render to SVG images
 embedded in the generated page. Nix supplies both renderers for builds, previews,
 and the development shell.
 
+Diagram images embed Source Serif 4 from the same Nix-provided assets as the site.
+Typography and the Pikchr palette are defined in `data/css/diagrams.css`;
+Hakyll embeds the stylesheet and font in each SVG.
+Use `fill white` in Pikchr for shapes that should receive the accent fill and outline.
+
 ```org
 #+begin_src dot :alt "Source files become a website"
 digraph {

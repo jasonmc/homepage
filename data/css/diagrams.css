@@ -1,0 +1,36 @@
+:root {
+    --ink: #2c2620;
+    --muted: #6c6257;
+    --accent: #a14d3a;
+    --code-bg: #f2e8da;
+}
+
+@font-face {
+    font-family: 'Source Serif 4';
+    font-style: normal;
+    font-weight: 200 900;
+    src: url('/fonts/source-serif-4.woff2') format('woff2');
+}
+
+text {
+    font-family: 'Source Serif 4', Georgia, serif;
+}
+
+/* Pikchr writes inline styles, so these palette rules need !important. */
+.pikchr path {
+    stroke: var(--muted) !important;
+}
+
+.pikchr polygon {
+    fill: var(--muted) !important;
+}
+
+.pikchr text {
+    fill: var(--ink);
+}
+
+/* Any filled shape receives the accent treatment; use fill white in Pikchr. */
+.pikchr path[style*="fill:rgb("] {
+    fill: var(--code-bg) !important;
+    stroke: var(--accent) !important;
+}
