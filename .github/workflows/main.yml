@@ -24,6 +24,9 @@ jobs:
       - name: Setup Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
+      - name: Check internal links
+        run: nix flake check --accept-flake-config
+
       - name: Build Pages tarball
         id: build
         run: |

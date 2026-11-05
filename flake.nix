@@ -95,6 +95,11 @@
 
         packages.default = self.packages.${system}.website;
 
+        checks.internal-links = pkgs.testers.lycheeLinkCheck {
+          inherit site;
+          relocatable = false;
+        };
+
         apps.watch = { type = "app"; program = "${watch}/bin/watch"; };
 
         devShells.default = haskellPackages.shellFor {
