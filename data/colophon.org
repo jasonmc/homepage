@@ -1,0 +1,45 @@
+---
+title: Colophon
+---
+
+This site is built from text files and templates. The generator, build environment,
+and publishing workflow are all kept in the [[https://github.com/jasonmc/homepage][source repository]].
+
+** Hakyll
+
+[[https://jaspervdj.be/hakyll/][Hakyll]] is the Haskell library that ties the site together. The
+[[https://github.com/jasonmc/homepage/blob/master/builder/site.hs][build rules]] describe how pages, posts, stylesheets, and other assets become
+files in the finished site.
+
+[[https://pandoc.org/][Pandoc]] converts Org, Markdown, and reStructuredText into HTML. Hakyll then
+applies the shared page templates, builds the post archive and RSS feed, and
+makes links relative to each page. The local preview watches the source files
+and rebuilds pages as they change.
+
+** Nix
+
+The [[https://github.com/jasonmc/homepage/blob/master/flake.nix][Nix flake]] defines both the site generator and the generated website as
+separate build outputs. Nix first compiles the Haskell program, then runs it to
+produce the static site. Unchanged build outputs can be reused from the Nix cache.
+
+The lock file pins the nixpkgs revision that supplies the compiler, Haskell
+libraries, and fonts. Fonts are fetched into the Nix store and passed to Hakyll,
+which copies them into the finished site. They do not need to be kept in the
+source tree.
+
+The same flake provides =nix build= for the website, =nix run .#watch= for the live
+preview, and =nix develop= for a Haskell development environment.
+
+** Checks and publishing
+
+On pushes and pull requests, [[https://github.com/jasonmc/homepage/blob/master/.github/workflows/main.yml][GitHub Actions]] runs =nix flake check=. This builds
+the site, validates its HTML with the [[https://validator.github.io/validator/][Nu HTML Checker]], and checks internal links
+with [[https://github.com/lycheeverse/lychee][Lychee]].
+
+After the checks pass, Nix packages the generated files into a GitHub Pages
+artifact. Successful builds on =master= are deployed to [[https://pages.github.com/][GitHub Pages]].
+
+** Typography
+
+Text and headings are set in [[https://github.com/adobe-fonts/source-serif][Source Serif 4]]. Code uses [[https://github.com/tonsky/FiraCode][Fira Code]].
+Both fonts are served locally as WOFF2 files.

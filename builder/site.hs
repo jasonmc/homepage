@@ -118,7 +118,7 @@ siteRules gitRevision assetDirectory assets = do
     route idRoute
     compile diagramCompiler
 
-  match (fromList ["about.rst", "contact.markdown"]) $ do
+  match (fromList ["about.rst", "contact.markdown", "colophon.org"]) $ do
     route $ setExtension "html"
     compile $
       pandocCompilerWith readerOptions writerOptions
