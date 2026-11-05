@@ -22,18 +22,13 @@
 
         builder = haskellPackages.callCabal2nix "Builder" "${./builder}" { };
 
-        fonts = pkgs.runCommand "website-fonts"
-          { nativeBuildInputs = [ pkgs.woff2 ]; }
-          ''
-            mkdir -p "$out"
-            cp ${pkgs.merriweather.webfont}/share/fonts/woff2/Merriweather-Regular.woff2 "$out/merriweather.woff2"
-
-            cp ${pkgs.roboto-slab}/share/fonts/truetype/RobotoSlab-Regular.ttf robotoslab.ttf
-            cp ${pkgs.fira-code.override { useVariableFont = false; }}/share/fonts/truetype/FiraCode-Regular.ttf firacode.ttf
-            woff2_compress robotoslab.ttf
-            woff2_compress firacode.ttf
-            cp robotoslab.woff2 firacode.woff2 "$out/"
-          '';
+        fonts = pkgs.runCommand "website-fonts" { } ''
+          mkdir -p "$out"
+          cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Roman.ttf.woff2 "$out/source-serif-4.woff2"
+          cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Italic.ttf.woff2 "$out/source-serif-4-italic.woff2"
+          cp ${pkgs.source-serif.src}/LICENSE.md "$out/source-serif-4-LICENSE.md"
+          cp ${pkgs.fira-code.src}/woff2/FiraCode-Regular.woff2 "$out/fira-code.woff2"
+        '';
 
         illustatus = pkgs.fetchFromGitHub {
           owner = "blairlee227";
@@ -44,7 +39,7 @@
 
         assets = pkgs.runCommand "website-assets" { } ''
           mkdir -p "$out/fonts" "$out/images"
-          cp ${fonts}/*.woff2 "$out/fonts/"
+          cp ${fonts}/* "$out/fonts/"
           {
             printf '<!--\nSource: https://github.com/blairlee227/IlluStatus\n\n'
             cat ${illustatus}/LICENSE
@@ -102,6 +97,7 @@
           runtimeInputs = [ builder ];
           text = ''
             export SITE_ASSETS=${assets}
+            export GIT_COMMIT=${pkgs.lib.escapeShellArg gitRev}
             exec site watch "$@"
           '';
         };
@@ -134,6 +130,7 @@
 
         devShells.default = haskellPackages.shellFor {
           packages = p: [ builder ];
+          GIT_COMMIT = gitRev;
           SITE_ASSETS = assets;
           buildInputs = with haskellPackages; site.buildInputs ++ [
             haskell-language-server

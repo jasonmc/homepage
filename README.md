@@ -6,7 +6,7 @@ Build with `nix build`, or preview locally with `nix run .#watch`.
 Run `nix flake check` to build the site, validate its HTML with vnu, and check
 its internal links.
 
-Merriweather, Roboto Slab, and Fira Code come from the pinned nixpkgs packages.
+Source Serif 4 and Fira Code come from the pinned nixpkgs font sources.
 The 404 illustration comes from a pinned [IlluStatus](https://github.com/blairlee227/IlluStatus)
 revision; its source credit and MIT license are included in the generated SVG.
 

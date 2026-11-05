@@ -44,7 +44,7 @@ dragon n = dragon (n - 1) <> rotateBy (1 / 4) (reverseTrail $ dragon (n - 1))
 diagram :: Diagram B
 diagram =
   strokeT (dragon 10)
-    # lc (sRGB24read "#a50104")
+    # lc (sRGB24read "#a14d3a")
     # lw medium
     # frame 1
 
@@ -80,7 +80,15 @@ main = hakyllWith hakyllConfig $ do
 
 siteRules :: String -> FilePath -> [(FilePath, BS.ByteString)] -> Rules ()
 siteRules gitRevision assetDirectory assets = do
-  let baseCtx = constField "gitRevision" gitRevision `mappend` defaultContext
+  let repository = "https://github.com/jasonmc/homepage"
+      revisionUrl =
+        if gitRevision == "unknown"
+          then repository
+          else repository ++ "/commit/" ++ takeWhile (/= '-') gitRevision
+      baseCtx =
+        constField "gitRevision" gitRevision
+          `mappend` constField "gitRevisionUrl" revisionUrl
+          `mappend` defaultContext
       postCtx = dateField "date" "%B %e, %Y" `mappend` baseCtx
 
   -- The immutable store path invalidates cached assets when their inputs change.
