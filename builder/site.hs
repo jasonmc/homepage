@@ -1,8 +1,8 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 
-import Control.Monad (forM_)
-import qualified Data.ByteString.Lazy as BL
+import Control.Monad (forM, forM_)
+import qualified Data.ByteString as BS
 import Data.Maybe (fromMaybe)
 import Data.Monoid (mappend)
 import Diagrams.Backend.SVG
@@ -53,15 +53,6 @@ diagramCompiler = do
   let rendered = renderDia SVG (SVGOptions (mkWidth 250) Nothing "" [] True) diagram
   makeItem $ show rendered
 
-gitContext :: Context String
-gitContext =
-  field "gitRevision" $ \_ ->
-    unsafeCompiler $
-      fmap (fromMaybe "unknown") (lookupEnv "GIT_COMMIT")
-
-baseCtx :: Context String
-baseCtx = gitContext `mappend` defaultContext
-
 highlightStyle :: Style
 highlightStyle = tango
 
@@ -77,14 +68,27 @@ readerOptions = defaultHakyllReaderOptions
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
-  fontDirectory <- preprocess (getEnv "SITE_FONTS")
-  fonts <- preprocess (listDirectory fontDirectory)
+  (gitRevision, fontDirectory, fonts) <- preprocess $ do
+    gitRevision <- fmap (fromMaybe "unknown") (lookupEnv "GIT_COMMIT")
+    fontDirectory <- getEnv "SITE_FONTS"
+    fontFiles <- listDirectory fontDirectory
+    fonts <- forM fontFiles $ \font -> do
+      bytes <- BS.readFile (fontDirectory ++ "/" ++ font)
+      pure (font, bytes)
+    pure (gitRevision, fontDirectory, fonts)
+  siteRules gitRevision fontDirectory fonts
+
+siteRules :: String -> FilePath -> [(FilePath, BS.ByteString)] -> Rules ()
+siteRules gitRevision fontDirectory fonts = do
+  let baseCtx = constField "gitRevision" gitRevision `mappend` defaultContext
+      postCtx = dateField "date" "%B %e, %Y" `mappend` baseCtx
+
   -- The immutable store path invalidates cached fonts when their package changes.
   version fontDirectory $
-    forM_ fonts $ \font ->
+    forM_ fonts $ \(font, bytes) ->
       create [fromFilePath ("fonts/" ++ font)] $ do
         route idRoute
-        compile $ unsafeCompiler (BL.readFile (fontDirectory ++ "/" ++ font)) >>= makeItem
+        compile $ makeItem bytes
 
   match "images/*" $ do
     route idRoute
@@ -171,9 +175,3 @@ main = hakyllWith hakyllConfig $ do
   create ["CNAME"] $ do
     route idRoute
     compile $ makeItem domain
-
---------------------------------------------------------------------------------
-postCtx :: Context String
-postCtx =
-  dateField "date" "%B %e, %Y"
-    `mappend` baseCtx
