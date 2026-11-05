@@ -35,6 +35,25 @@
             cp robotoslab.woff2 firacode.woff2 "$out/"
           '';
 
+        illustatus = pkgs.fetchFromGitHub {
+          owner = "blairlee227";
+          repo = "IlluStatus";
+          rev = "60822636928e525b758e1e0c1893cd5a8ae5bff3";
+          hash = "sha256-FZDbERMih1Ojym6daIjeLXIC2ZM5aEl1y/NBz3Axx60=";
+        };
+
+        assets = pkgs.runCommand "website-assets" { } ''
+          mkdir -p "$out/fonts" "$out/images"
+          cp ${fonts}/*.woff2 "$out/fonts/"
+          {
+            printf '<!--\nSource: https://github.com/blairlee227/IlluStatus\n\n'
+            cat ${illustatus}/LICENSE
+            printf '\n-->\n'
+            sed -n '/<svg id="mainImage_create"/,/<\/svg>/p' ${illustatus}/index.html \
+              | sed '/@import.*fonts\.googleapis\.com/d; s/#4f86ed/#b5041b/g'
+          } > "$out/images/404.svg"
+        '';
+
         site = pkgs.stdenv.mkDerivation {
           name = "website";
           buildInputs = [ ];
@@ -54,7 +73,7 @@
             "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
           GIT_COMMIT = gitRev;
-          SITE_FONTS = fonts;
+          SITE_ASSETS = assets;
 
           buildPhase = ''
             ${builder}/bin/site build --verbose
@@ -82,7 +101,7 @@
           name = "watch";
           runtimeInputs = [ builder ];
           text = ''
-            export SITE_FONTS=${fonts}
+            export SITE_ASSETS=${assets}
             exec site watch "$@"
           '';
         };
@@ -90,6 +109,7 @@
       {
         packages.builder = builder;
         packages.fonts = fonts;
+        packages.assets = assets;
         packages.website = site;
         packages.website-pages = pagesArtifact;
 
@@ -114,7 +134,7 @@
 
         devShells.default = haskellPackages.shellFor {
           packages = p: [ builder ];
-          SITE_FONTS = fonts;
+          SITE_ASSETS = assets;
           buildInputs = with haskellPackages; site.buildInputs ++ [
             haskell-language-server
             cabal-install

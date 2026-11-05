@@ -7,7 +7,6 @@ executable site
   main-is:          site.hs
   build-depends:    base == 4.*
                   , bytestring
-                  , directory
                   , hakyll == 4.16.*
                   , diagrams-svg >= 1.4 && < 1.6
                   , diagrams-lib >= 1.4 && < 1.6

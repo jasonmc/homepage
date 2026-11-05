@@ -7,6 +7,9 @@ Run `nix flake check` to build the site, validate its HTML with vnu, and check
 its internal links.
 
 Merriweather, Roboto Slab, and Fira Code come from the pinned nixpkgs packages.
-Nix prepares WOFF2 files in the Nix store and passes their directory to Hakyll via
-`SITE_FONTS`. Hakyll copies them into `_site/fonts/` as part of its normal build.
+The 404 illustration comes from a pinned [IlluStatus](https://github.com/blairlee227/IlluStatus)
+revision; its source credit and MIT license are included in the generated SVG.
+
+Nix prepares these assets in the Nix store and passes their directory to Hakyll via
+`SITE_ASSETS`. Hakyll copies them into `_site/` as part of its normal build.
 The Nix build, preview command, and `nix develop` set this variable automatically.

@@ -8,12 +8,12 @@ import Data.Monoid (mappend)
 import Diagrams.Backend.SVG
 import Diagrams.Prelude hiding (Context, Style, tri)
 import Hakyll
+import Hakyll.Core.Util.File (getRecursiveContents)
 import Hakyll.Web.Pandoc
   ( defaultHakyllReaderOptions,
     defaultHakyllWriterOptions,
     pandocCompilerWith
   )
-import System.Directory (listDirectory)
 import System.Environment (getEnv, lookupEnv)
 import Text.Pandoc.Highlighting (Style, styleToCss, tango)
 import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
@@ -68,25 +68,25 @@ readerOptions = defaultHakyllReaderOptions
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
-  (gitRevision, fontDirectory, fonts) <- preprocess $ do
+  (gitRevision, assetDirectory, assets) <- preprocess $ do
     gitRevision <- fmap (fromMaybe "unknown") (lookupEnv "GIT_COMMIT")
-    fontDirectory <- getEnv "SITE_FONTS"
-    fontFiles <- listDirectory fontDirectory
-    fonts <- forM fontFiles $ \font -> do
-      bytes <- BS.readFile (fontDirectory ++ "/" ++ font)
-      pure (font, bytes)
-    pure (gitRevision, fontDirectory, fonts)
-  siteRules gitRevision fontDirectory fonts
+    assetDirectory <- getEnv "SITE_ASSETS"
+    assetFiles <- getRecursiveContents (const $ pure False) assetDirectory
+    assets <- forM assetFiles $ \asset -> do
+      bytes <- BS.readFile (assetDirectory ++ "/" ++ asset)
+      pure (asset, bytes)
+    pure (gitRevision, assetDirectory, assets)
+  siteRules gitRevision assetDirectory assets
 
 siteRules :: String -> FilePath -> [(FilePath, BS.ByteString)] -> Rules ()
-siteRules gitRevision fontDirectory fonts = do
+siteRules gitRevision assetDirectory assets = do
   let baseCtx = constField "gitRevision" gitRevision `mappend` defaultContext
       postCtx = dateField "date" "%B %e, %Y" `mappend` baseCtx
 
-  -- The immutable store path invalidates cached fonts when their package changes.
-  version fontDirectory $
-    forM_ fonts $ \(font, bytes) ->
-      create [fromFilePath ("fonts/" ++ font)] $ do
+  -- The immutable store path invalidates cached assets when their inputs change.
+  version assetDirectory $
+    forM_ assets $ \(asset, bytes) ->
+      create [fromFilePath asset] $ do
         route idRoute
         compile $ makeItem bytes
 
