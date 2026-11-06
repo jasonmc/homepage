@@ -1,0 +1,22 @@
+---
+title: About
+---
+
+I’m a software engineer living in Brooklyn, New York. I grew up in County
+Donegal, Ireland, and studied computer science at Trinity College Dublin before
+moving to New York.
+
+Much of my career—including a long stretch at Google in New York—has been spent
+building distributed systems and developer infrastructure. I have a soft spot
+for functional programming, compilers, Unix tools, and the mathematical
+foundations of computing; this site is generated with Haskell, Nix, Pandoc, and
+Typst, as described in the [[./colophon.html][colophon]].
+
+Outside of software, I spend a good deal of time with a camera or on a
+bicycle—walking around Brooklyn, riding out to Fort Tilden or up into the
+Hudson Valley, and traveling when I can.
+
+I’ve kept a personal site in one form or another since 2005—including an early
+[[https://jasonmc.wordpress.com/][college blog]] in Dublin and a longer-running
+[[https://blog.jasonmc.net/][tumblelog]]—before settling on plain-text files
+here.
