@@ -274,6 +274,24 @@ pre code {
     font-size: inherit;
 }
 
+code span.kw,
+code span.cf,
+code span.st,
+code span.ch,
+code span.ss,
+code span.vs {
+    color: var(--accent);
+}
+
+code span.co,
+code span.do,
+code span.an,
+code span.cv,
+code span.in,
+code span.wa {
+    color: var(--muted);
+}
+
 img,
 video {
     display: block;

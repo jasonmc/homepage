@@ -20,7 +20,7 @@ import Hakyll.Web.Pandoc
     pandocCompilerWithTransformM
   )
 import System.Environment (getEnv, lookupEnv)
-import Text.Pandoc.Highlighting (Style, styleToCss, tango)
+import Text.Pandoc.Highlighting (Style, monochrome, styleToCss)
 import Text.Pandoc.Definition (Block (..), Format (..), Inline (..))
 import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
 import Text.Pandoc.Walk (walkM)
@@ -72,7 +72,7 @@ faviconCompiler = do
   makeItem outlined
 
 highlightStyle :: Style
-highlightStyle = tango
+highlightStyle = monochrome
 
 writerOptions :: WriterOptions
 writerOptions =
