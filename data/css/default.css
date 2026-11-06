@@ -171,6 +171,57 @@ a:visited {
     transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
+.post-list {
+    list-style: none;
+    padding: 0;
+}
+
+.post-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.post-date {
+    color: var(--muted);
+    font-size: 1rem;
+    font-variant-numeric: lining-nums tabular-nums;
+    white-space: nowrap;
+}
+
+.footnotes {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: 1rem;
+    color: var(--muted);
+}
+
+.footnotes > hr {
+    display: none;
+}
+
+a.footnote-ref {
+    margin-left: 0.08em;
+    text-decoration: none;
+}
+
+.footnote-back,
+.footnote-back:visited {
+    margin-left: 0.35em;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.footnote-back:hover,
+.footnote-back:focus {
+    color: var(--accent);
+}
+
 a:hover,
 a:focus {
     color: var(--heading);
@@ -396,5 +447,10 @@ footer a:focus {
 
     main {
         padding-bottom: 3rem;
+    }
+
+    .post-list li {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
     }
 }

@@ -1,12 +1,10 @@
 <article>
-    <section class="post-meta">
+    <p class="post-meta">
         Posted on $date$
         $if(author)$
             by $author$
         $endif$
         $if(pdfUrl)$ · <a href="$pdfUrl$" type="application/pdf">PDF edition</a>$endif$
-    </section>
-    <section>
-        $body$
-    </section>
+    </p>
+    $body$
 </article>
