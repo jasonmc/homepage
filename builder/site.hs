@@ -21,6 +21,7 @@ import Hakyll.Web.Pandoc
   )
 import System.Environment (getEnv, lookupEnv)
 import Pdf (pdfCompiler, pdfField)
+import Network.URI (parseURI, parseURIReference, relativeTo)
 import Text.HTML.TagSoup (Tag (..))
 import Text.Pandoc.Highlighting (Style, monochrome, styleToCss)
 import Text.Pandoc.Definition (Block (..), Format (..), Inline (..))
@@ -158,6 +159,22 @@ navigationField = field "navigation" $ \item -> do
       mark tag = tag
   pure $ withTags mark (itemBody links)
 
+feedDescriptionBody :: Item String -> Compiler String
+feedDescriptionBody item = do
+  route <- getRoute (itemIdentifier item)
+  let base = parseURI (feedRoot feedConfiguration ++ maybe "/" toUrl route)
+      absolute url@('#' : _) = url -- Local footnotes and SVG references.
+      absolute url
+        | Just origin <- base, Just target <- parseURIReference url =
+            show (target `relativeTo` origin)
+        | otherwise = url
+      stripAnchors (TagOpen "a" attrs : tags)
+        | "heading-anchor" `elem` words (fromMaybe "" (lookup "class" attrs)) =
+            stripAnchors (drop 1 (dropWhile (/= TagClose "a") tags))
+      stripAnchors (tag : tags) = tag : stripAnchors tags
+      stripAnchors [] = []
+  pure $ withUrls absolute $ withTagList stripAnchors $ itemBody item
+
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
@@ -247,7 +264,7 @@ siteRules gitRevision assetDirectory assets = do
   create ["rss.xml"] $ do
     route idRoute
     compile $ do
-      let feedCtx = postCtx `mappend` bodyField "description"
+      let feedCtx = field "description" feedDescriptionBody `mappend` postCtx
       posts <-
         fmap (take 10) . recentFirst
           =<< loadAllSnapshots ("posts/*" .&&. hasNoVersion) "content"
