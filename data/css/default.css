@@ -5,7 +5,6 @@
     --heading: #1f1813;
     --muted: #6c6257;
     --accent: #a14d3a;
-    --accent-soft: #d9b29a;
     --rule: #d6cabd;
     --code-bg: #f2e8da;
 }
@@ -163,14 +162,14 @@ a:visited {
     text-decoration: underline;
     text-decoration-thickness: 0.08em;
     text-underline-offset: 0.16em;
-    text-decoration-color: rgba(161, 77, 58, 0.55);
+    text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
     transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 a:hover,
 a:focus {
     color: var(--heading);
-    text-decoration-color: rgba(31, 24, 19, 0.5);
+    text-decoration-color: color-mix(in srgb, var(--heading) 50%, transparent);
 }
 
 a.heading-anchor,
@@ -336,7 +335,7 @@ tbody tr:last-child td {
 }
 
 tbody tr:nth-child(odd) {
-    background: rgba(242, 232, 218, 0.35);
+    background: color-mix(in srgb, var(--code-bg) 35%, transparent);
 }
 
 caption {
@@ -372,7 +371,7 @@ footer a:focus {
 }
 
 ::selection {
-    background: rgba(161, 77, 58, 0.2);
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 @media (max-width: 640px) {
