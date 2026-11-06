@@ -20,6 +20,8 @@ body {
     max-width: 37.5rem;
     padding: 3.3rem 1.75rem 3rem;
     text-rendering: optimizeLegibility;
+    font-optical-sizing: auto;
+    font-variant-numeric: oldstyle-nums proportional-nums;
 }
 
 header {
@@ -233,6 +235,7 @@ hr {
 code,
 pre {
     font-family: 'Fira Code', 'Courier New', monospace;
+    font-variant-numeric: lining-nums tabular-nums;
 }
 
 code {
@@ -294,6 +297,7 @@ table {
     border-collapse: collapse;
     border-top: 1px solid var(--rule);
     border-bottom: 1px solid var(--rule);
+    font-variant-numeric: lining-nums tabular-nums;
 }
 
 thead th {
