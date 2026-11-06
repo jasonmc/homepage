@@ -10,17 +10,27 @@
 }
 
 body {
+    box-sizing: border-box;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
     font-family: 'Source Serif 4', Georgia, serif;
     font-size: 20px;
     line-height: 1.48;
     color: var(--ink);
     background: var(--page-bg);
     margin: 0 auto;
-    max-width: 37.5rem;
+    max-width: 41rem;
     padding: 3.3rem 1.75rem 3rem;
     text-rendering: optimizeLegibility;
     font-optical-sizing: auto;
     font-variant-numeric: oldstyle-nums proportional-nums;
+}
+
+sup {
+    font-variant-position: super;
+    font-size: 100%;
+    top: 0;
 }
 
 header {
@@ -60,7 +70,7 @@ nav a:focus {
 
 main {
     background: var(--surface);
-    padding: 0;
+    padding: 0 0 4rem;
 }
 
 main > *:first-child {
@@ -155,14 +165,11 @@ nav .site-mark:visited {
     border-radius: 0;
 }
 
-.post-meta {
-    margin-bottom: 1.5rem;
+.post-meta,
+.pdf-edition {
+    margin: -0.75rem 0 1.5rem;
     font-size: 1rem;
     color: var(--muted);
-}
-
-.pdf-edition {
-    font-size: 1rem;
 }
 
 a,
@@ -355,7 +362,7 @@ caption {
 }
 
 footer {
-    margin-top: 4rem;
+    margin-top: auto;
     padding-top: 1.5rem;
     border-top: 1px solid var(--rule);
     display: flex;
@@ -398,7 +405,7 @@ footer a:focus {
         font-size: 1rem;
     }
 
-    footer {
-        margin-top: 3rem;
+    main {
+        padding-bottom: 3rem;
     }
 }

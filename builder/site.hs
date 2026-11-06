@@ -173,7 +173,8 @@ siteRules gitRevision assetDirectory assets = do
           `mappend` constField "gitRevision" gitRevision
           `mappend` constField "gitRevisionUrl" revisionUrl
           `mappend` defaultContext
-      postCtx = dateField "date" "%B %e, %Y" `mappend` baseCtx
+      postCtx = boolField "isPost" (const True)
+        `mappend` dateField "date" "%B %e, %Y" `mappend` baseCtx
 
   -- The immutable store path invalidates cached assets when their inputs change.
   version assetDirectory $

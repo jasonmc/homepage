@@ -30,8 +30,10 @@
 
         <main role="main">
             $if(home)$<p class="eyebrow">A personal homepage</p>$endif$
-            <h1>$title$</h1>
-            $if(pdfUrl)$<p class="pdf-edition"><a href="$pdfUrl$" type="application/pdf">PDF edition</a></p>$endif$
+            <h1>$if(home)$Jason M<sup>c</sup>Candless$else$$title$$endif$</h1>
+            $if(isPost)$$else$
+                $if(pdfUrl)$<p class="pdf-edition"><a href="$pdfUrl$" type="application/pdf">PDF edition</a></p>$endif$
+            $endif$
             $body$
         </main>
         <footer>
