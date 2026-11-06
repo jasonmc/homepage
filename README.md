@@ -21,6 +21,11 @@ lettering, and Hakyll derives the PNG sizes from it.
 The homepage dragon curve and the broken infinity curve on the 404 page are
 also generated with `diagrams` in `builder/site.hs`.
 
+`data/css/palette.css` defines the light and dark palettes. The page and generated
+SVG artwork share it, following the browser's color preference. Inline Pikchr and
+Graphviz diagrams use the same palette through `diagrams.css`. PNG icons retain
+the light palette, and PDF editions use their print palette.
+
 ## Section links
 
 Content headings have a `§` permalink, such as `/colophon.html#nix`.

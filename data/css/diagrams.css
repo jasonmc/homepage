@@ -2,6 +2,22 @@
     font-family: inherit;
 }
 
+.diagram svg:not(.pikchr) [stroke="black"] {
+    stroke: var(--muted);
+}
+
+.diagram svg:not(.pikchr) [fill="black"] {
+    fill: var(--muted);
+}
+
+.diagram svg:not(.pikchr) text[fill="black"] {
+    fill: var(--ink);
+}
+
+.diagram svg:not(.pikchr) [fill="white"] {
+    fill: var(--code-bg);
+}
+
 /* Pikchr writes inline styles, so these palette rules need !important. */
 .pikchr path {
     stroke: var(--muted) !important;

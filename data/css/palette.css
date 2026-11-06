@@ -1,0 +1,24 @@
+:root {
+    color-scheme: light dark;
+    --page-bg: #f8f5f0;
+    --surface: #f8f5f0;
+    --ink: #2c2620;
+    --heading: #1f1813;
+    --muted: #6c6257;
+    --accent: #a14d3a;
+    --rule: #d6cabd;
+    --code-bg: #f2e8da;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+    :root {
+        --page-bg: #211b17;
+        --surface: #211b17;
+        --ink: #e4d8c7;
+        --heading: #f4e9d8;
+        --muted: #b8a99a;
+        --accent: #d69b83;
+        --rule: #504238;
+        --code-bg: #302720;
+    }
+}

@@ -74,7 +74,16 @@ notFoundDiagram =
 diagramCompiler :: Double -> Diagram B -> Compiler (Item String)
 diagramCompiler width drawing = do
   let rendered = renderDia SVG (SVGOptions (mkWidth width) Nothing "" [] True) drawing
-  makeItem $ show rendered
+  adaptiveSvg "[stroke=\"rgb(161,77,58)\"]{stroke:var(--accent)}[fill=\"rgb(248,245,240)\"]{fill:var(--page-bg)}" (show rendered)
+    >>= makeItem
+
+adaptiveSvg :: String -> String -> Compiler String
+adaptiveSvg styles svg = do
+  palette <- loadBody "css/palette.css"
+  let inject tag@(TagOpen "svg" _) =
+        [tag, TagOpen "style" [], TagText (palette ++ styles), TagClose "style"]
+      inject tag = [tag]
+  pure $ withTagList (concatMap inject) svg
 
 favicon :: Diagram B
 favicon =
@@ -85,7 +94,9 @@ faviconCompiler :: Compiler (Item BL.ByteString)
 faviconCompiler = do
   let svg = show $ renderDia SVG (SVGOptions (mkWidth 512) Nothing "" [] True) favicon
   outlined <- unixFilterLBS "rsvg-convert" ["--format", "svg"] (BL.fromStrict (TE.encodeUtf8 (T.pack svg)))
-  makeItem outlined
+  themed <- adaptiveSvg "rect{fill:var(--accent)}path{fill:var(--page-bg)}"
+    (T.unpack (TE.decodeUtf8 (BL.toStrict outlined)))
+  makeItem (BL.fromStrict (TE.encodeUtf8 (T.pack themed)))
 
 highlightStyle :: Style
 highlightStyle = monochrome

@@ -1,14 +1,3 @@
-:root {
-    --page-bg: #f8f5f0;
-    --surface: #f8f5f0;
-    --ink: #2c2620;
-    --heading: #1f1813;
-    --muted: #6c6257;
-    --accent: #a14d3a;
-    --rule: #d6cabd;
-    --code-bg: #f2e8da;
-}
-
 body {
     box-sizing: border-box;
     min-height: 100dvh;
