@@ -20,6 +20,7 @@ import Hakyll.Web.Pandoc
     pandocCompilerWithTransformM
   )
 import System.Environment (getEnv, lookupEnv)
+import Text.HTML.TagSoup (Tag (..))
 import Text.Pandoc.Highlighting (Style, monochrome, styleToCss)
 import Text.Pandoc.Definition (Block (..), Format (..), Inline (..))
 import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
@@ -120,6 +121,17 @@ renderCodeDiagram block@(CodeBlock (identifier, classes, attributes) source)
     code = CodeBlock (identifier, classes, filter ((/= "alt") . fst) attributes) source
 renderCodeDiagram block = pure block
 
+navigationField :: Context String
+navigationField = field "navigation" $ \item -> do
+  route <- getRoute (itemIdentifier item)
+  links <- loadAndApplyTemplate "templates/navigation.html" defaultContext item
+  let url = if route == Just "index.html" then "/" else maybe "" toUrl route
+      mark (TagOpen "a" attributes)
+        | lookup "href" attributes == Just url =
+          TagOpen "a" (("aria-current", "page") : attributes)
+      mark tag = tag
+  pure $ withTags mark (itemBody links)
+
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith hakyllConfig $ do
@@ -141,7 +153,8 @@ siteRules gitRevision assetDirectory assets = do
           then repository
           else repository ++ "/commit/" ++ takeWhile (/= '-') gitRevision
       baseCtx =
-        constField "gitRevision" gitRevision
+        navigationField
+          `mappend` constField "gitRevision" gitRevision
           `mappend` constField "gitRevisionUrl" revisionUrl
           `mappend` defaultContext
       postCtx = dateField "date" "%B %e, %Y" `mappend` baseCtx

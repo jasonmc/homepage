@@ -47,6 +47,11 @@ nav a:visited {
     transition: color 0.2s ease, border-bottom-color 0.2s ease;
 }
 
+nav a[aria-current="page"] {
+    color: var(--heading);
+    border-bottom-color: var(--rule);
+}
+
 nav a:hover,
 nav a:focus {
     color: var(--accent);
