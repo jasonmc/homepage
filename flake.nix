@@ -22,7 +22,16 @@
 
         builder = haskellPackages.callCabal2nix "Builder" "${./builder}" { };
 
-        diagramTools = [ pkgs.graphviz pkgs.pikchr ];
+        faviconFontConfig = pkgs.makeFontsConf {
+          fontDirectories = [ "${pkgs.source-serif.src}/OTF" ];
+        };
+
+        svgRenderer = pkgs.writeShellScriptBin "rsvg-convert" ''
+          export FONTCONFIG_FILE=${faviconFontConfig}
+          exec ${pkgs.librsvg}/bin/rsvg-convert "$@"
+        '';
+
+        renderTools = [ pkgs.graphviz pkgs.pikchr svgRenderer ];
 
         fonts = pkgs.runCommand "website-fonts" { } ''
           mkdir -p "$out"
@@ -54,7 +63,7 @@
         site = pkgs.stdenv.mkDerivation {
           name = "website";
           buildInputs = [ ];
-          nativeBuildInputs = diagramTools;
+          nativeBuildInputs = renderTools;
           src = pkgs.nix-gitignore.gitignoreSourcePure [
             ./.gitignore
             ".git"
@@ -97,7 +106,7 @@
 
         watch = pkgs.writeShellApplication {
           name = "watch";
-          runtimeInputs = [ builder ] ++ diagramTools;
+          runtimeInputs = [ builder ] ++ renderTools;
           text = ''
             while [[ ! -f flake.nix || ! -d data/templates ]]; do
               if [[ "$PWD" == / ]]; then
@@ -140,7 +149,7 @@
 
         devShells.default = haskellPackages.shellFor {
           packages = p: [ builder ];
-          nativeBuildInputs = diagramTools;
+          nativeBuildInputs = renderTools;
           GIT_COMMIT = gitRev;
           SITE_ASSETS = assets;
           buildInputs = with haskellPackages; site.buildInputs ++ [

@@ -60,6 +60,17 @@ diagramCompiler = do
   let rendered = renderDia SVG (SVGOptions (mkWidth 250) Nothing "" [] True) diagram
   makeItem $ show rendered
 
+favicon :: Diagram B
+favicon =
+  (text "JMC" # font "Source Serif 4" # bold # fontSizeL 0.44 # fc (sRGB24read "#f8f5f0"))
+    <> (square 1 # fc (sRGB24read "#a14d3a") # lw none)
+
+faviconCompiler :: Compiler (Item BL.ByteString)
+faviconCompiler = do
+  let svg = show $ renderDia SVG (SVGOptions (mkWidth 512) Nothing "" [] True) favicon
+  outlined <- unixFilterLBS "rsvg-convert" ["--format", "svg"] (BL.fromStrict (TE.encodeUtf8 (T.pack svg)))
+  makeItem outlined
+
 highlightStyle :: Style
 highlightStyle = tango
 
@@ -146,9 +157,19 @@ siteRules gitRevision assetDirectory assets = do
     route idRoute
     compile copyFileCompiler
 
-  match "favicon/*" $ do
-    route idRoute
-    compile copyFileCompiler
+  version assetDirectory $ do
+    create ["favicon/favicon.svg"] $ do
+      route idRoute
+      compile faviconCompiler
+
+    forM_ [(16, "favicon-16x16.png"), (32, "favicon-32x32.png"),
+           (180, "apple-touch-icon.png"), (192, "android-chrome-192x192.png"), (512, "android-chrome-512x512.png")] $ \(size, name) ->
+      create [fromFilePath ("favicon/" ++ name)] $ do
+        route idRoute
+        compile $ do
+          svg <- loadBody $ setVersion (Just assetDirectory) "favicon/favicon.svg"
+          png <- unixFilterLBS "rsvg-convert" ["--width", show (size :: Int), "--height", show size] svg
+          makeItem png
 
   match "css/*" $ do
     route idRoute
