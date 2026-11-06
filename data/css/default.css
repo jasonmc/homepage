@@ -279,8 +279,14 @@ video {
     border-radius: 0;
 }
 
-img.diagram {
+.diagram {
+    margin: 2.8rem 0;
+}
+
+.diagram > svg {
+    display: block;
     width: 100%;
+    height: auto;
 }
 
 table {

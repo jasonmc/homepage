@@ -2,8 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Control.Monad (forM, forM_)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.State.Strict (StateT, evalStateT, state)
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Base64 as Base64
 import qualified Data.ByteString.Lazy as BL
 import Data.Maybe (fromMaybe)
 import Data.Monoid (mappend)
@@ -20,7 +21,7 @@ import Hakyll.Web.Pandoc
   )
 import System.Environment (getEnv, lookupEnv)
 import Text.Pandoc.Highlighting (Style, styleToCss, tango)
-import Text.Pandoc.Definition (Block (..), Inline (..))
+import Text.Pandoc.Definition (Block (..), Format (..), Inline (..))
 import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
 import Text.Pandoc.Walk (walkM)
 
@@ -74,7 +75,7 @@ readerOptions = defaultHakyllReaderOptions
 contentCompiler :: Compiler (Item String)
 contentCompiler =
   pandocCompilerWithTransformM readerOptions writerOptions $
-    walkM (renderCodeDiagram . addHeadingAnchor)
+    \document -> evalStateT (walkM (renderCodeDiagram . addHeadingAnchor) document) 1
 
 addHeadingAnchor :: Block -> Block
 addHeadingAnchor (Header level attributes@(identifier, _, _) inlines)
@@ -85,28 +86,27 @@ addHeadingAnchor (Header level attributes@(identifier, _, _) inlines)
       [Str "§"] ("#" <> identifier, "")
 addHeadingAnchor block = block
 
-renderCodeDiagram :: Block -> Compiler Block
+renderCodeDiagram :: Block -> StateT Int Compiler Block
 renderCodeDiagram block@(CodeBlock (identifier, classes, attributes) source)
   | not (any (`elem` classes) ["dot", "graphviz", "pikchr"]) = pure block
   | lookup "exports" attributes == Just "code" = pure code
-  | "dot" `elem` classes || "graphviz" `elem` classes =
-      render "dot" ["-Tsvg", "-Gbgcolor=transparent"] "Graphviz diagram"
-  | "pikchr" `elem` classes = render "pikchr" ["--svg-only", "-"] "Pikchr diagram"
-  where
-    code = CodeBlock (identifier, classes, filter ((/= "alt") . fst) attributes) source
-    render program arguments fallbackAlt = do
-      svg <- unixFilterLBS program arguments (BL.fromStrict (TE.encodeUtf8 source))
-      stylesheet <- loadBody "css/diagrams.css"
-      let diagramStyle = "<style>" <> T.pack stylesheet <> "</style>"
-          styledSvg = T.replace "</svg>" (diagramStyle <> "</svg>") (TE.decodeUtf8 (BL.toStrict svg))
-          uri = "data:image/svg+xml;base64," <> TE.decodeUtf8 (Base64.encode (TE.encodeUtf8 styledSvg))
-          alt = T.dropAround (== '"') (fromMaybe fallbackAlt (lookup "alt" attributes))
+  | otherwise = do
+      number <- state (\n -> (n, n + 1))
+      let (program, arguments, fallbackAlt) =
+            if "dot" `elem` classes || "graphviz" `elem` classes
+              then ("dot", ["-Tsvg_inline", "-Gbgcolor=transparent", "-Gid=code-diagram-" ++ show number], "Graphviz diagram")
+              else ("pikchr", ["--svg-only", "-"], "Pikchr diagram")
+      svg <- lift $ unixFilterLBS program arguments (BL.fromStrict (TE.encodeUtf8 source))
+      let alt = T.dropAround (== '"') (fromMaybe fallbackAlt (lookup "alt" attributes))
           showSource = lookup "exports" attributes == Just "both"
           imageId = if showSource then "" else identifier
-          image = Para [Image (imageId, ["diagram"], []) [Str alt] (uri, "")]
+          image = Div (imageId, ["diagram"], [("role", "img"), ("aria-label", alt)])
+            [RawBlock (Format "html") (TE.decodeUtf8 (BL.toStrict svg))]
       pure $ if showSource
         then Div ("", [], []) [code, image]
         else image
+  where
+    code = CodeBlock (identifier, classes, filter ((/= "alt") . fst) attributes) source
 renderCodeDiagram block = pure block
 
 --------------------------------------------------------------------------------
@@ -150,16 +150,9 @@ siteRules gitRevision assetDirectory assets = do
     route idRoute
     compile copyFileCompiler
 
-  match ("css/*" .&&. complement "css/diagrams.css") $ do
+  match "css/*" $ do
     route idRoute
     compile compressCssCompiler
-
-  -- Compile the self-contained SVG stylesheet once, with tracked dependencies.
-  match "css/diagrams.css" $ compile $ do
-    font <- loadBody $ setVersion (Just assetDirectory) "fonts/source-serif-4.woff2"
-    let fontUri = "data:font/woff2;base64," <> TE.decodeUtf8 (Base64.encode font)
-    stylesheet <- compressCssCompiler
-    pure $ fmap (T.unpack . T.replace "/fonts/source-serif-4.woff2" fontUri . T.pack) stylesheet
 
   create ["css/syntax.css"] $ do
     route idRoute

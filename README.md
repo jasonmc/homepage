@@ -29,13 +29,12 @@ To keep an Org section's link stable when renaming its heading, set `CUSTOM_ID`:
 
 ## Diagrams in Org
 
-Graphviz (`dot`, or `graphviz`) and Pikchr source blocks render to SVG images
-embedded in the generated page. Nix supplies both renderers for builds, previews,
+Graphviz (`dot`, or `graphviz`) and Pikchr source blocks render to inline SVG
+in the generated page. Nix supplies both renderers for builds, previews,
 and the development shell.
 
-Diagram images embed Source Serif 4 from the same Nix-provided assets as the site.
-Typography and the Pikchr palette are defined in `data/css/diagrams.css`;
-Hakyll embeds the stylesheet and font in each SVG.
+Diagrams share the page's fonts and stylesheets. `data/css/diagrams.css` defines
+their typography and applies the site's color palette to Pikchr diagrams.
 Use `fill white` in Pikchr for shapes that should receive the accent fill and outline.
 
 ```org
