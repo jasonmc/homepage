@@ -39,6 +39,36 @@ with [[https://github.com/lycheeverse/lychee][Lychee]].
 After the checks pass, Nix packages the generated files into a GitHub Pages
 artifact. Successful builds on =master= are deployed to [[https://pages.github.com/][GitHub Pages]].
 
+#+begin_src pikchr :alt "Nix compiles the Hakyll generator using pinned nixpkgs. The generator combines pages, templates, and assets into a static website. GitHub Actions checks the HTML and links, packages the site, and deploys master to GitHub Pages."
+boxwid = 1.3
+boxht = 0.52
+fontscale = 1.15
+thickness = 0.009
+
+Rules: file "Haskell rules" "site.hs" small width 1.25 height 0.6
+Pinned: cylinder "Pinned nixpkgs" "flake.lock" small width 1.25 height 0.6 at Rules + (3.4, 0)
+Generator: box "Compile generator" "Nix + GHC" small radius 0.06 at Rules + (1.7, -0.95)
+arrow from Rules.s to Generator.nw
+arrow from Pinned.s to Generator.ne
+
+Build: box "Build website" "Hakyll + Pandoc" small radius 0.06 fill white at Generator - (0, 0.9)
+Content: file "Pages + templates" "Org, Markdown, CSS" small width 1.25 height 0.6 at Build - (1.7, 0)
+Assets: cylinder "Fonts + assets" "Nix store" small width 1.25 height 0.6 at Build + (1.7, 0)
+arrow from Generator.s to Build.n
+arrow from Content.e to Build.w
+arrow from Assets.w to Build.e
+arrow from Pinned.s to Assets.n
+
+Checks: diamond "HTML + links" "valid?" small width 1.3 height 0.8 at Build - (0, 1)
+arrow from Build.s to Checks.n
+Stop: oval "Stop" "fix errors" small width 1.05 height 0.5 at Checks + (1.7, 0)
+arrow "fail" small above from Checks.e to Stop.w
+Artifact: file "Pages artifact" "website-pages.tar" small width 1.3 height 0.6 at Checks - (0, 1.05)
+arrow "pass" small ljust from Checks.s to Artifact.n
+Pages: oval "GitHub Pages" width 1.3 height 0.5 fill white at Artifact - (0, 0.95)
+arrow "master" small ljust from Artifact.s to Pages.n
+#+end_src
+
 ** Typography
 
 Text and headings are set in [[https://github.com/adobe-fonts/source-serif][Source Serif 4]]. Code uses [[https://github.com/tonsky/FiraCode][Fira Code]].
