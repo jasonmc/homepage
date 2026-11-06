@@ -36,6 +36,9 @@
 #set table.hline(stroke: 0.5pt + rule)
 #show table: set text(number-type: "lining", number-width: "tabular")
 #let horizontalrule = line(length: 100%, stroke: 0.5pt + rule)
+#let pdf-diagram(svg, alt) = block(width: 100%, above: 1em, below: 1em)[
+  #align(center, image(svg, format: "svg", width: 75%, alt: alt))
+]
 
 #block(below: 1.5em)[
   #text(font: "Source Serif 4 Display", size: 28pt, title)

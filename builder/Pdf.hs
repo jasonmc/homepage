@@ -52,15 +52,28 @@ pdfField = field "pdfUrl" $ \item -> do
 pdfDiagram :: P.Block -> P.Block
 pdfDiagram (P.Div (_, ["diagram"], attributes) [P.RawBlock (P.Format "html") svg]) =
   P.RawBlock (P.Format "typst") $
-    "#block(above: 1em, below: 1em)[#image(" <> typstBytes (withFonts svg)
-      <> ", format: \"svg\", alt: str(" <> typstBytes (fromMaybe "Diagram" (lookup "aria-label" attributes)) <> "))]"
+    "#pdf-diagram(" <> typstBytes (prepareSvg svg)
+      <> ", str(" <> typstBytes (fromMaybe "Diagram" (lookup "aria-label" attributes)) <> "))"
   where
-    withFonts = T.pack . withTags font . T.unpack
+    prepareSvg = T.replace "\xA0" " " . T.pack . withTags font . T.unpack
+    pikchr = "class=\"pikchr\"" `T.isInfixOf` svg
+    style properties attrs =
+      ("style", fromMaybe "" (lookup "style" attrs) ++ ";" ++ properties)
+        : filter ((/= "style") . fst) attrs
     font (TagOpen "svg" attrs) =
       TagOpen "svg" (("xmlns", "http://www.w3.org/2000/svg") : filter ((/= "xmlns") . fst) attrs)
     font (TagOpen "text" attrs) =
-      TagOpen "text" (("font-family", "Source Serif 4") : filter ((/= "font-family") . fst) attrs)
+      TagOpen "text" $ ("font-family", "Source Serif 4")
+        : filter ((/= "font-family") . fst) (if pikchr then style "fill:#2c2620" attrs else attrs)
+    font (TagOpen "path" attrs) | pikchr =
+      TagOpen "path" $ style
+        (if "fill:rgb(" `T.isInfixOf` T.pack (fromMaybe "" (lookup "style" attrs))
+          then "fill:#f2e8da;stroke:#a14d3a" else "stroke:#6c6257") attrs
+    font (TagOpen "polygon" attrs) | pikchr =
+      TagOpen "polygon" (style "fill:#6c6257" attrs)
+    font (TagText text) = TagText (map (\c -> if c == '\xA0' then ' ' else c) text)
     font tag = tag
+pdfDiagram (P.Header level attrs inlines) = P.Header (max 1 (level - 1)) attrs inlines
 pdfDiagram block = block
 
 typstBytes :: T.Text -> T.Text
