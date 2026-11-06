@@ -48,23 +48,9 @@
           cp ${pkgs.fira-code.src}/woff2/FiraCode-Regular.woff2 "$out/fira-code.woff2"
         '';
 
-        illustatus = pkgs.fetchFromGitHub {
-          owner = "blairlee227";
-          repo = "IlluStatus";
-          rev = "60822636928e525b758e1e0c1893cd5a8ae5bff3";
-          hash = "sha256-FZDbERMih1Ojym6daIjeLXIC2ZM5aEl1y/NBz3Axx60=";
-        };
-
         assets = pkgs.runCommand "website-assets" { } ''
-          mkdir -p "$out/fonts" "$out/images"
+          mkdir -p "$out/fonts"
           cp ${fonts}/* "$out/fonts/"
-          {
-            printf '<!--\nSource: https://github.com/blairlee227/IlluStatus\n\n'
-            cat ${illustatus}/LICENSE
-            printf '\n-->\n'
-            sed -n '/<svg id="mainImage_create"/,/<\/svg>/p' ${illustatus}/index.html \
-              | sed '/@import.*fonts\.googleapis\.com/d; s/#4f86ed/#b5041b/g'
-          } > "$out/images/404.svg"
         '';
 
         site = pkgs.stdenv.mkDerivation {

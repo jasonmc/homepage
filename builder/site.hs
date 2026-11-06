@@ -57,9 +57,23 @@ diagram =
     # lw medium
     # frame 1
 
-diagramCompiler :: Compiler (Item String)
-diagramCompiler = do
-  let rendered = renderDia SVG (SVGOptions (mkWidth 250) Nothing "" [] True) diagram
+notFoundDiagram :: Diagram B
+notFoundDiagram =
+  (mconcat [circle 0.06 # fc (sRGB24read "#f8f5f0") # moveTo (point t) | t <- ends]
+    <> mconcat [section 0.16 (pi - 0.16), section (pi + 0.16) (2 * pi - 0.16)])
+    # lc (sRGB24read "#a14d3a")
+    # lwL 0.025
+    # centerXY
+    # frame 0.4
+  where
+    point t = p2 (3 * sin t, 1.2 * sin (2 * t))
+    ends = [0.16, pi - 0.16, pi + 0.16, 2 * pi - 0.16]
+    section start end = fromVertices
+      [point (start + (end - start) * fromIntegral n / 160) | n <- [0 .. 160 :: Int]]
+
+diagramCompiler :: Double -> Diagram B -> Compiler (Item String)
+diagramCompiler width drawing = do
+  let rendered = renderDia SVG (SVGOptions (mkWidth width) Nothing "" [] True) drawing
   makeItem $ show rendered
 
 favicon :: Diagram B
@@ -196,7 +210,11 @@ siteRules gitRevision assetDirectory assets = do
 
   create ["diagram.svg"] $ do
     route idRoute
-    compile diagramCompiler
+    compile $ diagramCompiler 250 diagram
+
+  create ["images/404.svg"] $ do
+    route idRoute
+    compile $ diagramCompiler 480 notFoundDiagram
 
   match (fromList ["about.rst", "contact.markdown", "colophon.org"]) $ do
     route $ setExtension "html"
