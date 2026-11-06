@@ -20,6 +20,16 @@ The colophon and posts also have PDF editions. Pandoc converts the same source
 files to Typst, and [[https://typst.app/][Typst]] typesets the PDFs during the Hakyll build. A separate
 template controls the print layout, and each HTML page links to its PDF edition.
 
+** Diagrams
+
+Hakyll uses the Haskell =diagrams= library to draw the homepage dragon curve
+(=diagram.svg=), the broken infinity curve on the 404 page (=images/404.svg=),
+and the =jmc.= favicon.
+
+Pikchr and Graphviz source blocks in Org are rendered at build time and embedded
+as inline SVG in the HTML. They share the page's fonts and stylesheets. PDF
+editions embed the same diagrams as vector images.
+
 ** Nix
 
 The [[https://github.com/jasonmc/homepage/blob/master/flake.nix][Nix flake]] defines both the site generator and the generated website as
@@ -43,7 +53,7 @@ with [[https://github.com/lycheeverse/lychee][Lychee]].
 After the checks pass, Nix packages the generated files into a GitHub Pages
 artifact. Successful builds on =master= are deployed to [[https://pages.github.com/][GitHub Pages]].
 
-#+begin_src pikchr :alt "Nix compiles the Hakyll generator using pinned nixpkgs. The generator combines pages, templates, and assets into a static website. GitHub Actions checks the HTML and links, packages the site, and deploys master to GitHub Pages."
+#+begin_src pikchr :alt "Nix compiles Hakyll from the Haskell rules using pinned nixpkgs. Hakyll and Pandoc combine content, templates, fonts, and renderers to produce HTML, SVG graphics with diagrams, Pikchr and Graphviz, and PDF editions with Typst. GitHub Actions checks HTML and links, packages the outputs, and deploys master to GitHub Pages."
 boxwid = 1.3
 boxht = 0.52
 fontscale = 1.15
@@ -57,14 +67,23 @@ arrow from Pinned.s to Generator.ne
 
 Build: box "Build website" "Hakyll + Pandoc" small radius 0.06 fill white at Generator - (0, 0.9)
 Content: file "Pages + templates" "Org, Markdown, CSS" small width 1.25 height 0.6 at Build - (1.7, 0)
-Assets: cylinder "Fonts + assets" "Nix store" small width 1.25 height 0.6 at Build + (1.7, 0)
+Tools: cylinder "Fonts + tools" "Nix store" small width 1.25 height 0.6 at Build + (1.7, 0)
 arrow from Generator.s to Build.n
 arrow from Content.e to Build.w
-arrow from Assets.w to Build.e
-arrow from Pinned.s to Assets.n
+arrow from Tools.w to Build.e
+arrow from Pinned.s to Tools.n
 
-Checks: diamond "HTML + links" "valid?" small width 1.3 height 0.8 at Build - (0, 1)
-arrow from Build.s to Checks.n
+Html: file "HTML + CSS" "Pandoc" small width 1.4 height 0.7 at Build + (-1.7, -1)
+Svg: file "SVG visuals" "diagrams" "Pikchr + Graphviz" small width 1.4 height 0.7 at Build - (0, 1)
+Pdf: file "PDF editions" "Pandoc + Typst" small width 1.4 height 0.7 at Build + (1.7, -1)
+arrow from Build.s to Html.n
+arrow from Build.s to Svg.n
+arrow from Build.s to Pdf.n
+
+Checks: diamond "HTML + links" "valid?" small width 1.3 height 0.8 at Svg - (0, 1.05)
+arrow from Html.s to Checks.nw
+arrow from Svg.s to Checks.n
+arrow from Pdf.s to Checks.ne
 Stop: oval "Stop" "fix errors" small width 1.05 height 0.5 at Checks + (1.7, 0)
 arrow "fail" small above from Checks.e to Stop.w
 Artifact: file "Pages artifact" "website-pages.tar" small width 1.3 height 0.6 at Checks - (0, 1.05)

@@ -9,7 +9,8 @@ its internal links.
 
 Source Serif 4 and Fira Code come from the pinned nixpkgs font sources.
 
-Nix prepares these assets in the Nix store and passes their directory to Hakyll via
+Nix prepares the web fonts directly in a `fonts/` directory in the Nix store and
+passes that output to Hakyll via
 `SITE_ASSETS`. Hakyll copies them into `_site/` as part of its normal build.
 The Nix build, preview command, and `nix develop` set this variable automatically.
 

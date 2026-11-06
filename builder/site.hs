@@ -183,10 +183,6 @@ siteRules gitRevision assetDirectory assets = do
         route idRoute
         compile $ makeItem bytes
 
-  match "images/*" $ do
-    route idRoute
-    compile copyFileCompiler
-
   version assetDirectory $ do
     create ["favicon/favicon.svg"] $ do
       route idRoute

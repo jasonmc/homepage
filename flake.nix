@@ -41,16 +41,11 @@
         renderTools = [ pkgs.graphviz pkgs.pikchr svgRenderer typstRenderer ];
 
         fonts = pkgs.runCommand "website-fonts" { } ''
-          mkdir -p "$out"
-          cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Roman.ttf.woff2 "$out/source-serif-4.woff2"
-          cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Italic.ttf.woff2 "$out/source-serif-4-italic.woff2"
-          cp ${pkgs.source-serif.src}/LICENSE.md "$out/source-serif-4-LICENSE.md"
-          cp ${pkgs.fira-code.src}/woff2/FiraCode-Regular.woff2 "$out/fira-code.woff2"
-        '';
-
-        assets = pkgs.runCommand "website-assets" { } ''
           mkdir -p "$out/fonts"
-          cp ${fonts}/* "$out/fonts/"
+          cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Roman.ttf.woff2 "$out/fonts/source-serif-4.woff2"
+          cp ${pkgs.source-serif.src}/WOFF2/VAR/SourceSerif4Variable-Italic.ttf.woff2 "$out/fonts/source-serif-4-italic.woff2"
+          cp ${pkgs.source-serif.src}/LICENSE.md "$out/fonts/source-serif-4-LICENSE.md"
+          cp ${pkgs.fira-code.src}/woff2/FiraCode-Regular.woff2 "$out/fonts/fira-code.woff2"
         '';
 
         site = pkgs.stdenv.mkDerivation {
@@ -73,7 +68,7 @@
             "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
           GIT_COMMIT = gitRev;
-          SITE_ASSETS = assets;
+          SITE_ASSETS = fonts;
 
           buildPhase = ''
             ${builder}/bin/site build --verbose
@@ -108,7 +103,7 @@
               fi
               cd ..
             done
-            export SITE_ASSETS=${assets}
+            export SITE_ASSETS=${fonts}
             export GIT_COMMIT=${pkgs.lib.escapeShellArg gitRev}
             exec site watch "$@"
           '';
@@ -117,7 +112,6 @@
       {
         packages.builder = builder;
         packages.fonts = fonts;
-        packages.assets = assets;
         packages.website = site;
         packages.website-pages = pagesArtifact;
 
@@ -144,7 +138,7 @@
           packages = p: [ builder ];
           nativeBuildInputs = renderTools;
           GIT_COMMIT = gitRev;
-          SITE_ASSETS = assets;
+          SITE_ASSETS = fonts;
           buildInputs = with haskellPackages; site.buildInputs ++ [
             haskell-language-server
             cabal-install
