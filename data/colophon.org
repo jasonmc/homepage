@@ -16,6 +16,10 @@ applies the shared page templates, builds the post archive and RSS feed, and
 makes links relative to each page. The local preview watches the source files
 and rebuilds pages as they change.
 
+The colophon and posts also have PDF editions. Pandoc converts the same source
+files to Typst, and [[https://typst.app/][Typst]] typesets the PDFs during the Hakyll build. A separate
+template controls the print layout, and each HTML page links to its PDF edition.
+
 ** Nix
 
 The [[https://github.com/jasonmc/homepage/blob/master/flake.nix][Nix flake]] defines both the site generator and the generated website as
@@ -73,3 +77,6 @@ arrow "master" small ljust from Artifact.s to Pages.n
 
 Text and headings are set in [[https://github.com/adobe-fonts/source-serif][Source Serif 4]]. Code uses [[https://github.com/tonsky/FiraCode][Fira Code]].
 Both fonts are served locally as WOFF2 files.
+
+The PDF editions embed the same font families, supplied by Nix. Equations use
+STIX Two Math.

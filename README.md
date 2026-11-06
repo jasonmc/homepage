@@ -56,3 +56,20 @@ box "Source"; arrow; box "Website"
 Use `:exports both` to show the source alongside the diagram, or `:exports code`
 to keep a block as a code example. Omit `:exports results`: Pandoc hides the source
 of those blocks before diagram rendering. Invalid diagrams fail the build.
+
+## PDF editions
+
+The colophon and posts also build as PDFs at the same path with a `.pdf`
+extension, such as `/colophon.pdf`. Their HTML pages include a PDF download
+link. PDF editions use the same content sources; `data/templates/pdf.typ`
+defines the print layout, headings, code blocks, and page footers.
+
+Pandoc writes Typst, and Typst compiles the PDF during the Hakyll build.
+Nix supplies Typst and pins Source Serif 4, Fira Code, and STIX Two Math.
+System and embedded fallback fonts are disabled. The PDF embeds the fonts it
+uses, and Graphviz and Pikchr diagrams remain vector graphics.
+
+Post dates come from their metadata or dated filename. Relative links point
+back to the corresponding website URLs. PDF versions stay out of the HTML
+archive and RSS feed. Builds, previews, and the development shell all use
+the same PDF toolchain; generated files stay in `_site/` or the Nix store.

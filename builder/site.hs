@@ -20,6 +20,7 @@ import Hakyll.Web.Pandoc
     pandocCompilerWithTransformM
   )
 import System.Environment (getEnv, lookupEnv)
+import Pdf (pdfCompiler, pdfField)
 import Text.HTML.TagSoup (Tag (..))
 import Text.Pandoc.Highlighting (Style, monochrome, styleToCss)
 import Text.Pandoc.Definition (Block (..), Format (..), Inline (..))
@@ -154,6 +155,7 @@ siteRules gitRevision assetDirectory assets = do
           else repository ++ "/commit/" ++ takeWhile (/= '-') gitRevision
       baseCtx =
         navigationField
+          `mappend` pdfField
           `mappend` constField "gitRevision" gitRevision
           `mappend` constField "gitRevisionUrl" revisionUrl
           `mappend` defaultContext
@@ -212,19 +214,23 @@ siteRules gitRevision assetDirectory assets = do
         >>= loadAndApplyTemplate "templates/default.html" postCtx
         >>= relativizeUrls
 
+  match ("colophon.org" .||. "posts/*") $ version "pdf" $ do
+    route $ setExtension "pdf"
+    compile $ pdfCompiler domain $ \document -> evalStateT (walkM renderCodeDiagram document) 1
+
   create ["rss.xml"] $ do
     route idRoute
     compile $ do
       let feedCtx = postCtx `mappend` bodyField "description"
       posts <-
         fmap (take 10) . recentFirst
-          =<< loadAllSnapshots "posts/*" "content"
+          =<< loadAllSnapshots ("posts/*" .&&. hasNoVersion) "content"
       renderRss feedConfiguration feedCtx posts
 
   create ["archive.html"] $ do
     route idRoute
     compile $ do
-      posts <- recentFirst =<< loadAll "posts/*"
+      posts <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
       let archiveCtx =
             boolField "hasPosts" (const $ not $ null posts)
               `mappend` listField "posts" postCtx (return posts)
@@ -239,7 +245,7 @@ siteRules gitRevision assetDirectory assets = do
   match "index.html" $ do
     route idRoute
     compile $ do
-      posts <- recentFirst =<< loadAll "posts/*"
+      posts <- recentFirst =<< loadAll ("posts/*" .&&. hasNoVersion)
       let indexCtx =
             listField "posts" postCtx (return posts)
               `mappend` baseCtx

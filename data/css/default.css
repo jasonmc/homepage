@@ -161,6 +161,10 @@ nav .site-mark:visited {
     color: var(--muted);
 }
 
+.pdf-edition {
+    font-size: 1rem;
+}
+
 a,
 a:visited {
     color: var(--accent);

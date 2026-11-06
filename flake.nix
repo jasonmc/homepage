@@ -31,7 +31,14 @@
           exec ${pkgs.librsvg}/bin/rsvg-convert "$@"
         '';
 
-        renderTools = [ pkgs.graphviz pkgs.pikchr svgRenderer ];
+        typstRenderer = pkgs.writeShellScriptBin "typst" ''
+          export TYPST_FONT_PATHS="${pkgs.source-serif.src}/OTF:${pkgs.fira-code.src}/ttf:${pkgs.stix-two}/share/fonts"
+          export TYPST_IGNORE_SYSTEM_FONTS=true
+          export TYPST_IGNORE_EMBEDDED_FONTS=true
+          exec ${pkgs.typst}/bin/typst "$@"
+        '';
+
+        renderTools = [ pkgs.graphviz pkgs.pikchr svgRenderer typstRenderer ];
 
         fonts = pkgs.runCommand "website-fonts" { } ''
           mkdir -p "$out"

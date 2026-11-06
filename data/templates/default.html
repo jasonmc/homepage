@@ -31,6 +31,7 @@
         <main role="main">
             $if(home)$<p class="eyebrow">A personal homepage</p>$endif$
             <h1>$title$</h1>
+            $if(pdfUrl)$<p class="pdf-edition"><a href="$pdfUrl$" type="application/pdf">PDF edition</a></p>$endif$
             $body$
         </main>
         <footer>
