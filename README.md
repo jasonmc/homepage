@@ -15,7 +15,7 @@ Nix prepares these assets in the Nix store and passes their directory to Hakyll 
 `SITE_ASSETS`. Hakyll copies them into `_site/` as part of its normal build.
 The Nix build, preview command, and `nix develop` set this variable automatically.
 
-Hakyll generates the JMC favicon with `diagrams`, using Source Serif 4 and the
+Hakyll generates the italic `jmc.` favicon with `diagrams`, using Source Serif 4 and the
 site's colors. Nix supplies the font and SVG renderer. The SVG has outlined
 lettering, and Hakyll derives the PNG sizes from it.
 

@@ -62,7 +62,7 @@ diagramCompiler = do
 
 favicon :: Diagram B
 favicon =
-  (text "JMC" # font "Source Serif 4" # bold # fontSizeL 0.44 # fc (sRGB24read "#f8f5f0"))
+  (text "jmc." # font "Source Serif 4" # italic # fontSizeL 0.40 # fc (sRGB24read "#f8f5f0"))
     <> (square 1 # fc (sRGB24read "#a14d3a") # lw none)
 
 faviconCompiler :: Compiler (Item BL.ByteString)
