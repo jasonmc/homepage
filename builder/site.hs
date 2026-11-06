@@ -213,7 +213,8 @@ siteRules gitRevision assetDirectory assets = do
     compile $ do
       posts <- recentFirst =<< loadAll "posts/*"
       let archiveCtx =
-            listField "posts" postCtx (return posts)
+            boolField "hasPosts" (const $ not $ null posts)
+              `mappend` listField "posts" postCtx (return posts)
               `mappend` constField "title" "Archives"
               `mappend` baseCtx
 
@@ -241,7 +242,6 @@ siteRules gitRevision assetDirectory assets = do
       getResourceBody
         >>= applyAsTemplate baseCtx
         >>= loadAndApplyTemplate "templates/default.html" baseCtx
-        >>= relativizeUrls
 
   match "templates/*" $ compile templateBodyCompiler
 
