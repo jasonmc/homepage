@@ -241,7 +241,7 @@ siteRules gitRevision assetDirectory assets = do
     route idRoute
     compile $ diagramCompiler 480 notFoundDiagram
 
-  match (fromList ["about.rst", "contact.markdown", "colophon.org"]) $ do
+  match (fromList ["about.org", "contact.markdown", "colophon.org"]) $ do
     route $ setExtension "html"
     compile $
       contentCompiler
