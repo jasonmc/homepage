@@ -15,6 +15,18 @@ Nix prepares these assets in the Nix store and passes their directory to Hakyll 
 `SITE_ASSETS`. Hakyll copies them into `_site/` as part of its normal build.
 The Nix build, preview command, and `nix develop` set this variable automatically.
 
+## Section links
+
+Content headings have a `§` permalink, such as `/colophon.html#nix`.
+To keep an Org section's link stable when renaming its heading, set `CUSTOM_ID`:
+
+```org
+** Nix
+:PROPERTIES:
+:CUSTOM_ID: nix
+:END:
+```
+
 ## Diagrams in Org
 
 Graphviz (`dot`, or `graphviz`) and Pikchr source blocks render to SVG images

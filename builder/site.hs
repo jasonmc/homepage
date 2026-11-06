@@ -73,7 +73,17 @@ readerOptions = defaultHakyllReaderOptions
 
 contentCompiler :: Compiler (Item String)
 contentCompiler =
-  pandocCompilerWithTransformM readerOptions writerOptions (walkM renderCodeDiagram)
+  pandocCompilerWithTransformM readerOptions writerOptions $
+    walkM (renderCodeDiagram . addHeadingAnchor)
+
+addHeadingAnchor :: Block -> Block
+addHeadingAnchor (Header level attributes@(identifier, _, _) inlines)
+  | not (T.null identifier) =
+      Header level attributes (inlines ++ [Space, permalink])
+  where
+    permalink = Link ("", ["heading-anchor"], [("aria-label", "Link to this section")])
+      [Str "§"] ("#" <> identifier, "")
+addHeadingAnchor block = block
 
 renderCodeDiagram :: Block -> Compiler Block
 renderCodeDiagram block@(CodeBlock (identifier, classes, attributes) source)

@@ -171,6 +171,34 @@ a:focus {
     text-decoration-color: rgba(31, 24, 19, 0.5);
 }
 
+a.heading-anchor,
+a.heading-anchor:visited {
+    color: var(--muted);
+    font-size: 0.75em;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+a.heading-anchor:hover,
+a.heading-anchor:focus {
+    color: var(--accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    a.heading-anchor {
+        opacity: 0;
+    }
+
+    :is(h1, h2, h3, h4, h5, h6):hover a.heading-anchor,
+    a.heading-anchor:focus {
+        opacity: 1;
+    }
+}
+
+:target {
+    scroll-margin-top: 1.5rem;
+}
+
 ul,
 ol {
     padding-left: 1.45em;
