@@ -25,7 +25,12 @@ import Network.URI (parseURI, parseURIReference, relativeTo)
 import Text.HTML.TagSoup (Tag (..))
 import Text.Pandoc.Highlighting (Style, monochrome, styleToCss)
 import Text.Pandoc.Definition (Block (..), Format (..), Inline (..))
-import Text.Pandoc.Options (ReaderOptions, WriterOptions, writerHighlightStyle)
+import Text.Pandoc.Options
+  ( HighlightMethod (Skylighting),
+    ReaderOptions,
+    WriterOptions,
+    writerHighlightMethod
+  )
 import Text.Pandoc.Walk (walkM)
 
 domain :: String
@@ -105,7 +110,7 @@ highlightStyle = monochrome
 writerOptions :: WriterOptions
 writerOptions =
   defaultHakyllWriterOptions
-    { writerHighlightStyle = Just highlightStyle
+    { writerHighlightMethod = Skylighting highlightStyle
     }
 
 readerOptions :: ReaderOptions

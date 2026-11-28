@@ -8,11 +8,11 @@ executable site
   other-modules:    Pdf
   build-depends:    base == 4.*
                   , bytestring
-                  , hakyll == 4.16.*
+                  , hakyll >= 4.16 && < 4.18
                   , diagrams-svg >= 1.4 && < 1.6
                   , diagrams-lib >= 1.4 && < 1.6
                   , network-uri
-                  , pandoc >= 3.7 && < 4
+                  , pandoc >= 3.8 && < 4
                   , pandoc-types
                   , tagsoup
                   , text
